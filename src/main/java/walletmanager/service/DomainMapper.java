@@ -1,8 +1,8 @@
-package service;
+package walletmanager.service;
 
-import request.CreateUserRequest;
-import response.UserResponse;
-import user.UserEntity;
+import walletmanager.request.CreateUserRequest;
+import walletmanager.response.UserResponse;
+import walletmanager.user.UserEntity;
 
 import java.util.List;
 import java.util.Set;

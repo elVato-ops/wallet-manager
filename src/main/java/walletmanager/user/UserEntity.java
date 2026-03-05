@@ -1,6 +1,6 @@
-package user;
+package walletmanager.user;
 
-import exception.UserValidationException;
+import walletmanager.exception.UserValidationException;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -11,15 +11,15 @@ public class UserEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
 
-    String name;
+    private String name;
 
     public UserEntity(String name)
     {
-        if (name == null)
+        if (name == null || name.isBlank())
         {
-            throw new UserValidationException("User name must not be null");
+            throw new UserValidationException("User name must not be empty");
         }
 
         this.name = name;

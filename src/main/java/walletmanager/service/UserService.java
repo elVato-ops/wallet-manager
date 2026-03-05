@@ -1,12 +1,12 @@
-package service;
+package walletmanager.service;
 
-import exception.UserNotFoundException;
+import walletmanager.exception.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import repository.UserRepository;
-import request.CreateUserRequest;
-import response.UserResponse;
-import user.UserEntity;
+import walletmanager.repository.UserRepository;
+import walletmanager.request.CreateUserRequest;
+import walletmanager.response.UserResponse;
+import walletmanager.user.UserEntity;
 
 import java.util.Set;
 

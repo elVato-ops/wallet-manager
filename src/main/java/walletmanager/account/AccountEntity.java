@@ -1,7 +1,7 @@
-package account;
+package walletmanager.account;
 
 import jakarta.persistence.*;
-import user.UserEntity;
+import walletmanager.user.UserEntity;
 
 import java.util.Currency;
 
@@ -11,11 +11,11 @@ public class AccountEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
 
-    Currency currency;
-    Integer balance;
+    private Currency currency;
+    private Integer balance;
 
     @ManyToOne
-    UserEntity user;
+    private UserEntity user;
 }

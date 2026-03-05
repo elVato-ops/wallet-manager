@@ -1,6 +1,6 @@
-package repository;
+package walletmanager.repository;
 
-import account.AccountEntity;
+import walletmanager.account.AccountEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountRepository extends JpaRepository<Long, AccountEntity>

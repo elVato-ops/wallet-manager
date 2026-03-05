@@ -1,7 +1,7 @@
-package repository;
+package walletmanager.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import user.UserEntity;
+import walletmanager.user.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long>
 {

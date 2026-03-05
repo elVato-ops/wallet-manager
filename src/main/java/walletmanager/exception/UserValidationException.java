@@ -1,4 +1,4 @@
-package exception;
+package walletmanager.exception;
 
 public class UserValidationException extends RuntimeException
 {

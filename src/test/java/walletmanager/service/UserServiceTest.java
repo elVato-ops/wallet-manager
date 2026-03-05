@@ -1,15 +1,15 @@
-package service;
+package walletmanager.service;
 
-import exception.UserNotFoundException;
+import walletmanager.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import repository.UserRepository;
-import request.CreateUserRequest;
-import response.UserResponse;
-import user.UserEntity;
+import walletmanager.repository.UserRepository;
+import walletmanager.request.CreateUserRequest;
+import walletmanager.response.UserResponse;
+import walletmanager.user.UserEntity;
 
 import java.util.List;
 import java.util.Optional;

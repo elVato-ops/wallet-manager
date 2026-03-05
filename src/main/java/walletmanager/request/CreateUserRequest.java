@@ -1,4 +1,4 @@
-package request;
+package walletmanager.request;
 
 import jakarta.validation.constraints.NotNull;
 

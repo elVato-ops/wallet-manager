@@ -1,6 +1,6 @@
-package user;
+package walletmanager.user;
 
-import exception.UserValidationException;
+import walletmanager.exception.UserValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,5 +11,7 @@ public class UserEntityTest
     public void constructorValidation_shouldThrowException()
     {
         assertThrows(UserValidationException.class, () -> new UserEntity(null));
+        assertThrows(UserValidationException.class, () -> new UserEntity(""));
+        assertThrows(UserValidationException.class, () -> new UserEntity("       "));
     }
 }

@@ -1,12 +1,12 @@
-package controller;
+package walletmanager.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import request.CreateUserRequest;
-import response.UserResponse;
-import service.UserService;
+import walletmanager.request.CreateUserRequest;
+import walletmanager.response.UserResponse;
+import walletmanager.service.UserService;
 
 import java.net.URI;
 import java.util.Set;
@@ -24,7 +24,7 @@ public class UserController
         UserResponse response = userService.createUser(request);
 
         return ResponseEntity
-                .created(URI.create("/users" + response.id()))
+                .created(URI.create("/users/" + response.id()))
                 .body(response);
     }
 
