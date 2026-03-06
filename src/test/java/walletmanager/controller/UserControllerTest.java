@@ -1,12 +1,14 @@
 package walletmanager.controller;
 
-import walletmanager.exception.UserNotFoundException;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import walletmanager.exception.UserNotFoundException;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
@@ -14,8 +16,9 @@ import walletmanager.service.UserService;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,63 +26,146 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 public class UserControllerTest
 {
+    private static final Long USER_ID = 17L;
+    private static final Long ACCOUNT_ID = 997L;
+    
     @MockBean
     UserService service;
 
     @Autowired
     MockMvc mockMvc;
 
-    @Test
-    public void createUser_returns201() throws Exception
+    @Nested
+    class CreateUser
     {
-        String json = """
+        @Test
+        public void returns201_whenRequestValid() throws Exception
         {
-          "name": "Bobek"
-        }""";
+            //GIVEN
+            String json = """
+            {
+              "name": "Bobek"
+            }""";
 
-        UserResponse response = new UserResponse(17L, "Bobek");
-        when(service.createUser(any(CreateUserRequest.class))).thenReturn(response);
+            UserResponse response = new UserResponse(USER_ID, "Bobek");
+            when(service.createUser(any(CreateUserRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/users/17"))
-                .andExpect(jsonPath("$.name").value("Bobek"));
+            ArgumentCaptor<CreateUserRequest> captor = ArgumentCaptor.forClass(CreateUserRequest.class);
+
+            //WHEN
+            mockMvc.perform(post("/users")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isCreated())
+                    .andExpect(header().string("Location", "/users/17"))
+                    .andExpect(jsonPath("$.name").value("Bobek"));
+
+            verify(service).createUser(captor.capture());
+            verify(service, times(1)).createUser(any());
+            verifyNoMoreInteractions(service);
+
+            CreateUserRequest captorRequest = captor.getValue();
+            assertEquals("Bobek", captorRequest.name());
+        }
+
+        @Test
+        public void returns400_whenNameEmpty() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "name": ""
+            }""";
+
+            //WHEN
+            mockMvc.perform(post("/users")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).createUser(any());
+        }
     }
 
-    @Test
-    public void getUser_returnsUser() throws Exception
+    @Nested
+    class GetUser
     {
-        UserResponse response = new UserResponse(997L, "Bobek");
+        @Test
+        public void returns200_whenPathValid() throws Exception
+        {
+            //GIVEN
+            UserResponse response = new UserResponse(ACCOUNT_ID, "Bobek");
 
-        when(service.getUser(997L)).thenReturn(response);
+            when(service.getUser(ACCOUNT_ID)).thenReturn(response);
 
-        mockMvc.perform(get("/users/997"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Bobek"));
+            //WHEN
+            mockMvc.perform(get("/users/997"))
+
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("Bobek"));
+
+            verify(service, times(1)).getUser(ACCOUNT_ID);
+            verifyNoMoreInteractions(service);
+        }
+
+        @Test
+        public void returns404_whenUserNotExists() throws Exception
+        {
+            //GIVEN
+            when(service.getUser(ACCOUNT_ID)).thenThrow(UserNotFoundException.class);
+
+            //WHEN
+            mockMvc.perform(get("/users/997"))
+
+            //THEN
+                    .andExpect(status().isNotFound());
+
+            verify(service, times(1)).getUser(ACCOUNT_ID);
+            verifyNoMoreInteractions(service);
+        }
+
+        @Test
+        public void returns400_whenPathInvalid() throws Exception
+        {
+            //GIVEN
+
+            //WHEN
+            mockMvc.perform(get("/users/abc"))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).getUser(any());
+        }
     }
 
-    @Test
-    public void getUser_notExists_returns404() throws Exception
+    @Nested
+    class GetAllUsers
     {
-        when(service.getUser(997L)).thenThrow(UserNotFoundException.class);
+        @Test
+        public void returns200_whenRequestValid() throws Exception
+        {
+            //GIVEN
+            UserResponse userOne = new UserResponse(1L, "Bobek");
+            UserResponse userTwo = new UserResponse(2L, "Nubek");
 
-        mockMvc.perform(get("/users/997"))
-                .andExpect(status().isNotFound());
-    }
+            when(service.getAllUsers()).thenReturn(Set.of(userOne, userTwo));
 
-    @Test
-    public void getUsers_returnsUsers() throws Exception
-    {
-        UserResponse userOne = new UserResponse(1L, "Bobek");
-        UserResponse userTwo = new UserResponse(2L, "Nubek");
+            //WHEN
+            mockMvc.perform(get("/users"))
 
-        when(service.getAllUsers()).thenReturn(Set.of(userOne, userTwo));
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[*].name", containsInAnyOrder("Bobek", "Nubek")))
+                    .andExpect(jsonPath("$[*].id", containsInAnyOrder(1, 2)));
 
-        mockMvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].name", containsInAnyOrder("Bobek", "Nubek")))
-                .andExpect(jsonPath("$[*].id", containsInAnyOrder(1, 2)));
+            verify(service, times(1)).getAllUsers();
+            verifyNoMoreInteractions(service);
+        }
     }
 }

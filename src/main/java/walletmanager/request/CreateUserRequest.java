@@ -1,9 +1,9 @@
 package walletmanager.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 
-public record CreateUserRequest(@NotNull String name)
+public record CreateUserRequest(@NotEmpty String name)
 {
 
 }
