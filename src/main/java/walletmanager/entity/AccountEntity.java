@@ -2,7 +2,9 @@ package walletmanager.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import walletmanager.exception.AccountValidationException;
+import walletmanager.utils.CurrencyConverter;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -10,16 +12,18 @@ import java.util.Currency;
 @Entity
 @Table(name = "accounts")
 @Getter
+@NoArgsConstructor
 public class AccountEntity
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Convert(converter = CurrencyConverter.class)
     private Currency currency;
     private BigDecimal balance;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

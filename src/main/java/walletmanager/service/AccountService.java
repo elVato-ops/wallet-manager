@@ -13,8 +13,8 @@ import walletmanager.entity.UserEntity;
 
 import java.util.List;
 
-import static walletmanager.service.AccountMapper.toEntity;
-import static walletmanager.service.AccountMapper.toResponse;
+import static walletmanager.utils.AccountMapper.toEntity;
+import static walletmanager.utils.AccountMapper.toResponse;
 
 @Service
 @AllArgsConstructor

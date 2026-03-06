@@ -7,6 +7,7 @@ import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;
 import walletmanager.entity.UserEntity;
+import walletmanager.utils.UserMapper;
 
 import java.util.List;
 

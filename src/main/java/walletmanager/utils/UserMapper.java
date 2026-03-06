@@ -1,4 +1,4 @@
-package walletmanager.service;
+package walletmanager.utils;
 
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;

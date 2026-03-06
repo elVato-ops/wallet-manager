@@ -1,9 +1,9 @@
-package walletmanager.service;
+package walletmanager.utils;
 
 import walletmanager.entity.AccountEntity;
+import walletmanager.entity.UserEntity;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.response.AccountResponse;
-import walletmanager.entity.UserEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
