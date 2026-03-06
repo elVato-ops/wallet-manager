@@ -2,10 +2,9 @@ package walletmanager.service;
 
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;
-import walletmanager.user.UserEntity;
+import walletmanager.entity.UserEntity;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserMapper
@@ -20,10 +19,10 @@ public class UserMapper
         return new UserResponse(user.getId(), user.getName());
     }
 
-    public static Set<UserResponse> toResponse(List<UserEntity> users)
+    public static List<UserResponse> toResponse(List<UserEntity> users)
     {
         return users.stream()
                 .map(UserMapper::toResponse)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 }

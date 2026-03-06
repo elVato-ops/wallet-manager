@@ -9,7 +9,7 @@ import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
 
 import java.net.URI;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -39,9 +39,9 @@ public class UserController
     }
 
     @GetMapping
-    public ResponseEntity<Set<UserResponse>> getAllUsers()
+    public ResponseEntity<List<UserResponse>> getAllUsers()
     {
-        Set<UserResponse> users = userService.getAllUsers();
+        List<UserResponse> users = userService.getAllUsers();
 
         return ResponseEntity
                 .ok()

@@ -1,9 +1,8 @@
-package walletmanager.account;
+package walletmanager.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import walletmanager.exception.AccountValidationException;
-import walletmanager.user.UserEntity;
 
 import java.math.BigDecimal;
 import java.util.Currency;

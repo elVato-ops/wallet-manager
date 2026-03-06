@@ -1,12 +1,11 @@
 package walletmanager.service;
 
-import walletmanager.account.AccountEntity;
+import walletmanager.entity.AccountEntity;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.response.AccountResponse;
-import walletmanager.user.UserEntity;
+import walletmanager.entity.UserEntity;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AccountMapper
@@ -21,10 +20,10 @@ public class AccountMapper
         return new AccountResponse(entity.getId(), entity.getCurrency(), entity.getBalance(), entity.getUser().getId());
     }
 
-    public static Set<AccountResponse> toResponse(List<AccountEntity> accounts)
+    public static List<AccountResponse> toResponse(List<AccountEntity> accounts)
     {
         return accounts.stream()
                 .map(AccountMapper::toResponse)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 }

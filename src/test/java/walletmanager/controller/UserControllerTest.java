@@ -13,7 +13,7 @@ import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,7 +154,7 @@ public class UserControllerTest
             UserResponse userOne = new UserResponse(1L, "Bobek");
             UserResponse userTwo = new UserResponse(2L, "Nubek");
 
-            when(service.getAllUsers()).thenReturn(Set.of(userOne, userTwo));
+            when(service.getAllUsers()).thenReturn(List.of(userOne, userTwo));
 
             //WHEN
             mockMvc.perform(get("/users"))

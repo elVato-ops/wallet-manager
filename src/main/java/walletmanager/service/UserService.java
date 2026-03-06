@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.UserResponse;
-import walletmanager.user.UserEntity;
+import walletmanager.entity.UserEntity;
 
-import java.util.Set;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class UserService
         return UserMapper.toResponse(userEntity);
     }
 
-    public Set<UserResponse> getAllUsers()
+    public List<UserResponse> getAllUsers()
     {
         return UserMapper.toResponse(repository.findAll());
     }

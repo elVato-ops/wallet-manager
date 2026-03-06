@@ -1,6 +1,6 @@
 package walletmanager.repository;
 
-import walletmanager.account.AccountEntity;
+import walletmanager.entity.AccountEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

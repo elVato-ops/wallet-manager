@@ -18,7 +18,7 @@ import walletmanager.service.AccountService;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -175,7 +175,7 @@ public class AccountControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(service.obtainAccountsForUser(USER_ID)).thenReturn(Set.of(response));
+            when(service.obtainAccountsForUser(USER_ID)).thenReturn(List.of(response));
 
             //WHEN
             mockMvc.perform(get("/accounts")

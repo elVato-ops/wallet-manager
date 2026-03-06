@@ -1,4 +1,4 @@
-package walletmanager.user;
+package walletmanager.entity;
 
 import walletmanager.exception.UserValidationException;
 import jakarta.persistence.*;

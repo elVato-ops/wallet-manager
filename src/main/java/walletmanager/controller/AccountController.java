@@ -9,7 +9,7 @@ import walletmanager.response.AccountResponse;
 import walletmanager.service.AccountService;
 
 import java.net.URI;
-import java.util.Set;
+import java.util.List;
 
 
 @RestController
@@ -30,9 +30,9 @@ public class AccountController
     }
 
     @GetMapping
-    public ResponseEntity<Set<AccountResponse>> obtainAccountsForUser(@RequestParam Long userId)
+    public ResponseEntity<List<AccountResponse>> obtainAccountsForUser(@RequestParam Long userId)
     {
-        Set<AccountResponse> accountResponses = service.obtainAccountsForUser(userId);
+        List<AccountResponse> accountResponses = service.obtainAccountsForUser(userId);
 
         return ResponseEntity
                 .ok()

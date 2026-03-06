@@ -1,6 +1,5 @@
-package walletmanager.transaction;
+package walletmanager.entity;
 
-import walletmanager.account.AccountEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

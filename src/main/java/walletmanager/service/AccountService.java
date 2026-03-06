@@ -2,16 +2,16 @@ package walletmanager.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import walletmanager.account.AccountEntity;
+import walletmanager.entity.AccountEntity;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.response.AccountResponse;
-import walletmanager.user.UserEntity;
+import walletmanager.entity.UserEntity;
 
-import java.util.Set;
+import java.util.List;
 
 import static walletmanager.service.AccountMapper.toEntity;
 import static walletmanager.service.AccountMapper.toResponse;
@@ -31,7 +31,7 @@ public class AccountService
         return toResponse(accountRepository.save(toEntity(request, user)));
     }
 
-    public Set<AccountResponse> obtainAccountsForUser(Long id)
+    public List<AccountResponse> obtainAccountsForUser(Long id)
     {
         if (!userRepository.existsById(id))
         {
