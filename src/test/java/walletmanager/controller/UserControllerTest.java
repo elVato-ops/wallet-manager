@@ -27,8 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTest
 {
     private static final Long USER_ID = 17L;
+    private static final String USER_NAME = "Bobek";
     private static final Long ACCOUNT_ID = 997L;
-    
+
     @MockBean
     UserService service;
 
@@ -47,7 +48,7 @@ public class UserControllerTest
               "name": "Bobek"
             }""";
 
-            UserResponse response = new UserResponse(USER_ID, "Bobek");
+            UserResponse response = new UserResponse(USER_ID, USER_NAME);
             when(service.createUser(any(CreateUserRequest.class))).thenReturn(response);
 
             ArgumentCaptor<CreateUserRequest> captor = ArgumentCaptor.forClass(CreateUserRequest.class);
@@ -60,14 +61,13 @@ public class UserControllerTest
             //THEN
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", "/users/17"))
-                    .andExpect(jsonPath("$.name").value("Bobek"));
+                    .andExpect(jsonPath("$.name").value(USER_NAME));
 
             verify(service).createUser(captor.capture());
-            verify(service, times(1)).createUser(any());
             verifyNoMoreInteractions(service);
 
             CreateUserRequest captorRequest = captor.getValue();
-            assertEquals("Bobek", captorRequest.name());
+            assertEquals(USER_NAME, captorRequest.name());
         }
 
         @Test
@@ -98,7 +98,7 @@ public class UserControllerTest
         public void returns200_whenPathValid() throws Exception
         {
             //GIVEN
-            UserResponse response = new UserResponse(ACCOUNT_ID, "Bobek");
+            UserResponse response = new UserResponse(ACCOUNT_ID, USER_NAME);
 
             when(service.getUser(ACCOUNT_ID)).thenReturn(response);
 
@@ -107,7 +107,7 @@ public class UserControllerTest
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("Bobek"));
+                    .andExpect(jsonPath("$.name").value(USER_NAME));
 
             verify(service, times(1)).getUser(ACCOUNT_ID);
             verifyNoMoreInteractions(service);
@@ -140,7 +140,7 @@ public class UserControllerTest
             //THEN
                     .andExpect(status().isBadRequest());
 
-            verify(service, never()).getUser(any());
+            verify(service, never()).getUser(anyLong());
         }
     }
 

@@ -30,7 +30,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AccountController.class)
 public class AccountControllerTest
 {
-    private final AccountResponse response = new AccountResponse(997L, Currency.getInstance("PLN"), BigDecimal.valueOf(100L), 17L);
+    private static final Long USER_ID = 17L;
+    private static final Long ACCOUNT_ID = 997L;
+    private static final Currency PLN = Currency.getInstance("PLN");
+    private static final BigDecimal BALANCE = BigDecimal.valueOf(100L);
+
+    private final AccountResponse response = new AccountResponse(ACCOUNT_ID, PLN, BALANCE, USER_ID);
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,7 +54,7 @@ public class AccountControllerTest
         {
             //GIVEN
             CreateAccountRequest request =
-                    new CreateAccountRequest(17L, Currency.getInstance("PLN"), BigDecimal.valueOf(100));
+                    new CreateAccountRequest(USER_ID, PLN, BigDecimal.valueOf(100));
 
             when(service.createAccount(any(CreateAccountRequest.class))).thenReturn(response);
             ArgumentCaptor<CreateAccountRequest> captor = ArgumentCaptor.forClass(CreateAccountRequest.class);
@@ -62,19 +67,18 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isCreated())
                     .andExpect(header().string(HttpHeaders.LOCATION, "/accounts/997"))
-                    .andExpect(jsonPath("$.id").value(response.id()))
-                    .andExpect(jsonPath("$.currency").value(response.currency().toString()))
-                    .andExpect(jsonPath("$.balance").value(response.balance()))
-                    .andExpect(jsonPath("$.userId").value(response.userId()));
+                    .andExpect(jsonPath("$.id").value(ACCOUNT_ID))
+                    .andExpect(jsonPath("$.currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$.balance").value(BALANCE))
+                    .andExpect(jsonPath("$.userId").value(USER_ID));
 
             verify(service).createAccount(captor.capture());
-            verify(service, times(1)).createAccount(any());
             verifyNoMoreInteractions(service);
 
             CreateAccountRequest captorRequest = captor.getValue();
-            assertEquals(17L, captorRequest.userId());
-            assertEquals(Currency.getInstance("PLN"), captorRequest.currency());
-            assertEquals(BigDecimal.valueOf(100L), captorRequest.balance());
+            assertEquals(USER_ID, captorRequest.userId());
+            assertEquals(PLN, captorRequest.currency());
+            assertEquals(BALANCE, captorRequest.balance());
         }
 
         @Test
@@ -108,8 +112,6 @@ public class AccountControllerTest
               "balance": 100
             }""";
 
-            verify(service, never()).createAccount(any());
-
             //WHEN
             mockMvc.perform(post("/accounts")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -131,8 +133,6 @@ public class AccountControllerTest
               "currency": "PLN",
               "balance": -100
             }""";
-
-            verify(service, never()).createAccount(any());
 
             //WHEN
             mockMvc.perform(post("/accounts")
@@ -172,10 +172,10 @@ public class AccountControllerTest
     class GetAccountForUser
     {
         @Test
-        public void returns201_whenRequestValid() throws Exception
+        public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(service.obtainAccountsForUser(17L)).thenReturn(Set.of(response));
+            when(service.obtainAccountsForUser(USER_ID)).thenReturn(Set.of(response));
 
             //WHEN
             mockMvc.perform(get("/accounts")
@@ -183,12 +183,12 @@ public class AccountControllerTest
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].id").value(response.id()))
-                    .andExpect(jsonPath("$[0].currency").value(response.currency().toString()))
-                    .andExpect(jsonPath("$[0].balance").value(response.balance()))
-                    .andExpect(jsonPath("$[0].userId").value(response.userId()));
+                    .andExpect(jsonPath("$[0].id").value(ACCOUNT_ID))
+                    .andExpect(jsonPath("$[0].currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$[0].balance").value(BALANCE))
+                    .andExpect(jsonPath("$[0].userId").value(USER_ID));
 
-            verify(service, times(1)).obtainAccountsForUser(17L);
+            verify(service, times(1)).obtainAccountsForUser(USER_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -196,7 +196,7 @@ public class AccountControllerTest
         public void returns404_whenUserNotExists() throws Exception
         {
             //GIVEN
-            when(service.obtainAccountsForUser(17L)).thenThrow(new UserNotFoundException(17L));
+            when(service.obtainAccountsForUser(USER_ID)).thenThrow(new UserNotFoundException(USER_ID));
 
             //WHEN
             mockMvc.perform(get("/accounts")
@@ -205,7 +205,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isNotFound());
 
-            verify(service, times(1)).obtainAccountsForUser(17L);
+            verify(service, times(1)).obtainAccountsForUser(USER_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -221,7 +221,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isBadRequest());
 
-            verify(service, never()).obtainAccountsForUser(any());
+            verify(service, never()).obtainAccountsForUser(anyLong());
         }
     }
 
@@ -232,19 +232,19 @@ public class AccountControllerTest
         public void returns200_whenUrlValid() throws Exception
         {
             //GIVEN
-            when(service.obtainAccount(997L)).thenReturn(response);
+            when(service.obtainAccount(ACCOUNT_ID)).thenReturn(response);
 
             //WHEN
             mockMvc.perform(get("/accounts/997"))
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(response.id()))
-                    .andExpect(jsonPath("$.currency").value(response.currency().toString()))
-                    .andExpect(jsonPath("$.balance").value(response.balance()))
-                    .andExpect(jsonPath("$.userId").value(response.userId()));
+                    .andExpect(jsonPath("$.id").value(ACCOUNT_ID))
+                    .andExpect(jsonPath("$.currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$.balance").value(BALANCE))
+                    .andExpect(jsonPath("$.userId").value(USER_ID));
 
-            verify(service, times(1)).obtainAccount(997L);
+            verify(service, times(1)).obtainAccount(ACCOUNT_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -252,7 +252,7 @@ public class AccountControllerTest
         public void returns404_whenAccountNotExists() throws Exception
         {
             //GIVEN
-            when(service.obtainAccount(997L)).thenThrow(new AccountNotFoundException(997L));
+            when(service.obtainAccount(ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             //WHEN
             mockMvc.perform(get("/accounts/997"))
@@ -260,7 +260,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isNotFound());
 
-            verify(service, times(1)).obtainAccount(997L);
+            verify(service, times(1)).obtainAccount(ACCOUNT_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -275,7 +275,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isBadRequest());
 
-            verify(service, never()).obtainAccount(any());
+            verify(service, never()).obtainAccount(anyLong());
         }
     }
 }
