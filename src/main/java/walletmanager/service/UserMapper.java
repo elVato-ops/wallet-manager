@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DomainMapper
+public class UserMapper
 {
     public static UserEntity toEntity(CreateUserRequest request)
     {
@@ -23,7 +23,7 @@ public class DomainMapper
     public static Set<UserResponse> toResponse(List<UserEntity> users)
     {
         return users.stream()
-                .map(DomainMapper::toResponse)
+                .map(UserMapper::toResponse)
                 .collect(Collectors.toSet());
     }
 }

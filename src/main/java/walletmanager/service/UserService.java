@@ -18,8 +18,8 @@ public class UserService
 
     public UserResponse createUser(CreateUserRequest request)
     {
-        UserEntity userEntity = DomainMapper.toEntity(request);
-        return DomainMapper.toResponse(repository.save(userEntity));
+        UserEntity userEntity = UserMapper.toEntity(request);
+        return UserMapper.toResponse(repository.save(userEntity));
     }
 
     public UserResponse getUser(Long id)
@@ -27,11 +27,11 @@ public class UserService
         UserEntity userEntity = repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        return DomainMapper.toResponse(userEntity);
+        return UserMapper.toResponse(userEntity);
     }
 
     public Set<UserResponse> getAllUsers()
     {
-        return DomainMapper.toResponse(repository.findAll());
+        return UserMapper.toResponse(repository.findAll());
     }
 }

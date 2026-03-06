@@ -21,4 +21,18 @@ public class GlobalExceptionHandler
     {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler(AccountValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAccountValidationException(AccountValidationException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleAccountNotFoundException(AccountNotFoundException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
 }
