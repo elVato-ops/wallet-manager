@@ -3,8 +3,10 @@ package walletmanager.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import walletmanager.exception.TransactionValidationException;
 import walletmanager.utils.CurrencyConverter;
 
+import javax.swing.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Currency;
@@ -31,5 +33,22 @@ public class TransactionEntity
     @ManyToOne(fetch = FetchType.LAZY)
     private AccountEntity toAccount;
 
-//    this.timestamp = LocalDateTime.now();
+    public TransactionEntity(BigDecimal amount, Currency currency, AccountEntity fromAccount, AccountEntity toAccount)
+    {
+        if (currency == null)
+        {
+            throw new TransactionValidationException("Transaction currency cannot be null");
+        }
+
+        if (amount.equals(BigDecimal.ZERO))
+        {
+            throw new TransactionValidationException("Transaction amount cannot be 0");
+        }
+
+        this.amount = amount;
+        this.currency = currency;
+        this.timestamp = LocalDateTime.now();
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
+    }
 }

@@ -35,4 +35,25 @@ public class GlobalExceptionHandler
     {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler(TransactionValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAccountNotFoundException(TransactionValidationException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleInsufficientFoundsException(InsufficientFundsException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalTransactionException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleIllegalTransactionException(IllegalTransactionException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
 }
