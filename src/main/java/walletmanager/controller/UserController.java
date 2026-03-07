@@ -1,10 +1,13 @@
 package walletmanager.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
+import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
 
@@ -46,5 +49,15 @@ public class UserController
         return ResponseEntity
                 .ok()
                 .body(users);
+    }
+
+    @PostMapping("/{userId}/accounts")
+    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request, @PathVariable @Positive Long userId)
+    {
+        AccountResponse account = userService.createAccount(request, userId);
+
+        return ResponseEntity
+                .created(URI.create("/users/" + account.userId() + "/accounts/" + account.id()))
+                .body(account);
     }
 }

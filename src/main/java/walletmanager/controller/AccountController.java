@@ -1,16 +1,12 @@
 package walletmanager.controller;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import walletmanager.request.CreateAccountRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.service.AccountService;
 
-import java.net.URI;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/accounts")
@@ -18,16 +14,6 @@ import java.util.List;
 public class AccountController
 {
     private final AccountService service;
-
-    @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request)
-    {
-        AccountResponse account = service.createAccount(request);
-
-        return ResponseEntity
-                .created(URI.create("/accounts/" + account.id()))
-                .body(account);
-    }
 
     @GetMapping
     public ResponseEntity<List<AccountResponse>> obtainAccountsForUser(@RequestParam Long userId)

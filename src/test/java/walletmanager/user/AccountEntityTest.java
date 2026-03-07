@@ -3,27 +3,23 @@ package walletmanager.user;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import walletmanager.entity.AccountEntity;
-import walletmanager.entity.UserEntity;
 import walletmanager.exception.AccountValidationException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.exception.InsufficientFundsException;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static walletmanager.utils.TestConstants.*;
 
 public class AccountEntityTest
 {
-    private static final Currency PLN = Currency.getInstance("PLN");
-    private static final UserEntity USER = new UserEntity("Bobek");
-
     @Test
     public void returnsException_whenParameterInvalid()
     {
-        assertThrows(AccountValidationException.class, () -> new AccountEntity(null, BigDecimal.TEN, USER));
-        assertThrows(AccountValidationException.class, () -> new AccountEntity(PLN, BigDecimal.valueOf(-10L), USER));
+        assertThrows(AccountValidationException.class, () -> new AccountEntity(null, BigDecimal.TEN, user()));
+        assertThrows(AccountValidationException.class, () -> new AccountEntity(PLN, BigDecimal.valueOf(-10L), user()));
         assertThrows(AccountValidationException.class, () -> new AccountEntity(PLN, BigDecimal.TEN, null));
     }
 
@@ -34,7 +30,7 @@ public class AccountEntityTest
         public void updatesBalance_whenWithdrawLessThanBalance()
         {
             //GIVEN
-            AccountEntity account = new AccountEntity(PLN, BigDecimal.valueOf(100L), USER);
+            AccountEntity account = account();
 
             //WHEN
             account.withdraw(BigDecimal.valueOf(50L));
@@ -48,21 +44,13 @@ public class AccountEntityTest
         @Test
         public void throwsInsufficientFunds_whenWithdrawMoreThanBalance()
         {
-            //GIVEN
-            AccountEntity account = new AccountEntity(PLN, BigDecimal.valueOf(100L), USER);
-
-            //THEN
-            assertThrows(InsufficientFundsException.class, () -> account.withdraw(BigDecimal.valueOf(110L)));
+            assertThrows(InsufficientFundsException.class, () -> account().withdraw(BigDecimal.valueOf(110L)));
         }
 
         @Test
         public void throwsIllegalTransaction_whenWithdrawNegativeAmount()
         {
-            //GIVEN
-            AccountEntity account = new AccountEntity(PLN, BigDecimal.valueOf(100L), USER);
-
-            //THEN
-            assertThrows(IllegalTransactionException.class, () -> account.withdraw(BigDecimal.valueOf(-10L)));
+            assertThrows(IllegalTransactionException.class, () -> account().withdraw(BigDecimal.valueOf(-10L)));
         }
     }
 
@@ -73,7 +61,7 @@ public class AccountEntityTest
         public void updatesBalance_whenDepositPositiveAmount()
         {
             //GIVEN
-            AccountEntity account = new AccountEntity(PLN, BigDecimal.valueOf(100L), USER);
+            AccountEntity account = account();
 
             //WHEN
             account.deposit(BigDecimal.valueOf(50L));
@@ -88,10 +76,6 @@ public class AccountEntityTest
     @Test
     public void throwsIllegalTransaction_whenDepositNegativeAmount()
     {
-        //GIVEN
-        AccountEntity account = new AccountEntity(PLN, BigDecimal.valueOf(100L), USER);
-
-        //THEN
-        assertThrows(IllegalTransactionException.class, () -> account.deposit(BigDecimal.valueOf(-10L)));
+        assertThrows(IllegalTransactionException.class, () -> account().deposit(BigDecimal.valueOf(-10L)));
     }
 }

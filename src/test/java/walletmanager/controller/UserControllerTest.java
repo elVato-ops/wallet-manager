@@ -1,15 +1,19 @@
 package walletmanager.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import walletmanager.exception.UserNotFoundException;
+import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
+import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
 
@@ -22,19 +26,19 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static walletmanager.utils.TestConstants.*;
 
 @WebMvcTest(UserController.class)
 public class UserControllerTest
 {
-    private static final Long USER_ID = 17L;
-    private static final String USER_NAME = "Bobek";
-    private static final Long ACCOUNT_ID = 997L;
-
     @MockBean
     UserService service;
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Nested
     class CreateUser
@@ -166,6 +170,126 @@ public class UserControllerTest
 
             verify(service, times(1)).getAllUsers();
             verifyNoMoreInteractions(service);
+        }
+    }
+
+    @Nested
+    class CreateAccount
+    {
+        @Test
+        public void returns201_whenRequestValid() throws Exception
+        {
+            //GIVEN
+            CreateAccountRequest request =
+                    new CreateAccountRequest(PLN, BALANCE);
+
+            AccountResponse response = new AccountResponse(ACCOUNT_ID, PLN, BALANCE, USER_ID);
+
+            when(service.createAccount(any(CreateAccountRequest.class), eq(USER_ID))).thenReturn(response);
+            ArgumentCaptor<CreateAccountRequest> captor = ArgumentCaptor.forClass(CreateAccountRequest.class);
+
+
+            //WHEN
+            mockMvc.perform(post("/users/" + USER_ID + "/accounts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(request)))
+
+            //THEN
+                    .andExpect(status().isCreated())
+                    .andExpect(header().string(HttpHeaders.LOCATION, "/users/" + USER_ID + "/accounts/997"))
+                    .andExpect(jsonPath("$.id").value(ACCOUNT_ID))
+                    .andExpect(jsonPath("$.currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$.balance").value(BALANCE))
+                    .andExpect(jsonPath("$.userId").value(USER_ID));
+
+            verify(service).createAccount(captor.capture(), eq(USER_ID));
+            verifyNoMoreInteractions(service);
+
+            CreateAccountRequest captorRequest = captor.getValue();
+            assertEquals(PLN, captorRequest.currency());
+            assertEquals(BALANCE, captorRequest.balance());
+        }
+
+        @Test
+        public void returns400_whenRequestInvalid() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "balance": 100
+            }""";
+
+            //WHEN
+            mockMvc.perform(post("/users/17/accounts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).createAccount(any(), eq(17L));
+        }
+
+        @Test
+        public void returns400_whenUserIdInvalid() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "currency": "PLN",
+              "balance": 100
+            }""";
+
+            //WHEN
+            mockMvc.perform(post("/users/-3/accounts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).createAccount(any(), eq(-3L));
+        }
+
+        @Test
+        public void returns400_whenBalanceNegative() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "currency": "PLN",
+              "balance": -100
+            }""";
+
+            //WHEN
+            mockMvc.perform(post("/users/3/accounts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).createAccount(any(), eq(3L));
+        }
+
+        @Test
+        public void returns400_whenCurrencyNull() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "currency": null,
+              "balance": "100"
+            }""";
+
+            //WHEN
+            mockMvc.perform(post("/users/3/accounts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verify(service, never()).createAccount(any(), eq(3L));
         }
     }
 }
