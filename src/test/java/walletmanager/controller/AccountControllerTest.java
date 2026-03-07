@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.service.AccountService;
-
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,7 +33,7 @@ public class AccountControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(service.obtainAccountsForUser(USER_ID)).thenReturn(List.of(accountResponse()));
+            when(service.getAccountsForUser(eq(USER_ID), any(Pageable.class))).thenReturn(accountPageResponse());
 
             //WHEN
             mockMvc.perform(get("/accounts")
@@ -42,12 +41,12 @@ public class AccountControllerTest
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].id").value(ACCOUNT_ID))
-                    .andExpect(jsonPath("$[0].currency").value(PLN.toString()))
-                    .andExpect(jsonPath("$[0].balance").value(BALANCE))
-                    .andExpect(jsonPath("$[0].userId").value(USER_ID));
+                    .andExpect(jsonPath("$.content[*].id").value(Integer.valueOf(ACCOUNT_ID.toString())))
+                    .andExpect(jsonPath("$.content[*].currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$.content[*].balance").value(Integer.valueOf(BALANCE.toString())))
+                    .andExpect(jsonPath("$.content[*].userId").value(Integer.valueOf(USER_ID.toString())));
 
-            verify(service, times(1)).obtainAccountsForUser(USER_ID);
+            verify(service, times(1)).getAccountsForUser(eq(USER_ID), any(Pageable.class));
             verifyNoMoreInteractions(service);
         }
 
@@ -55,7 +54,7 @@ public class AccountControllerTest
         public void returns404_whenUserNotExists() throws Exception
         {
             //GIVEN
-            when(service.obtainAccountsForUser(USER_ID)).thenThrow(new UserNotFoundException(USER_ID));
+            when(service.getAccountsForUser(eq(USER_ID), any(Pageable.class))).thenThrow(new UserNotFoundException(USER_ID));
 
             //WHEN
             mockMvc.perform(get("/accounts")
@@ -64,7 +63,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isNotFound());
 
-            verify(service, times(1)).obtainAccountsForUser(USER_ID);
+            verify(service, times(1)).getAccountsForUser(eq(USER_ID), any(Pageable.class));
             verifyNoMoreInteractions(service);
         }
 
@@ -80,7 +79,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isBadRequest());
 
-            verify(service, never()).obtainAccountsForUser(anyLong());
+            verify(service, never()).getAccountsForUser(anyLong(), eq(PAGEABLE));
         }
     }
 
@@ -91,7 +90,7 @@ public class AccountControllerTest
         public void returns200_whenUrlValid() throws Exception
         {
             //GIVEN
-            when(service.obtainAccount(ACCOUNT_ID)).thenReturn(accountResponse());
+            when(service.getAccount(ACCOUNT_ID)).thenReturn(accountResponse());
 
             //WHEN
             mockMvc.perform(get("/accounts/997"))
@@ -103,7 +102,7 @@ public class AccountControllerTest
                     .andExpect(jsonPath("$.balance").value(BALANCE))
                     .andExpect(jsonPath("$.userId").value(USER_ID));
 
-            verify(service, times(1)).obtainAccount(ACCOUNT_ID);
+            verify(service, times(1)).getAccount(ACCOUNT_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -111,7 +110,7 @@ public class AccountControllerTest
         public void returns404_whenAccountNotExists() throws Exception
         {
             //GIVEN
-            when(service.obtainAccount(ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
+            when(service.getAccount(ACCOUNT_ID)).thenThrow(new AccountNotFoundException(ACCOUNT_ID));
 
             //WHEN
             mockMvc.perform(get("/accounts/997"))
@@ -119,7 +118,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isNotFound());
 
-            verify(service, times(1)).obtainAccount(ACCOUNT_ID);
+            verify(service, times(1)).getAccount(ACCOUNT_ID);
             verifyNoMoreInteractions(service);
         }
 
@@ -134,7 +133,7 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isBadRequest());
 
-            verify(service, never()).obtainAccount(anyLong());
+            verify(service, never()).getAccount(anyLong());
         }
     }
 }

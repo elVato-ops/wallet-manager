@@ -6,18 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.UserRepository;
 import walletmanager.response.AccountResponse;
 
-import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static walletmanager.utils.TestConstants.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,19 +40,21 @@ public class AccountServiceTest
         {
             //GIVEN
             when(userRepository.existsById(USER_ID)).thenReturn(true);
-            when(accountRepository.findByUserId(USER_ID)).thenReturn(List.of(account()));
+            when(accountRepository.findByUserId(USER_ID, PAGEABLE)).thenReturn(accountPageEntity());
 
             //WHEN
-            List<AccountResponse> accounts = service.obtainAccountsForUser(USER_ID);
+            Page<AccountResponse> accounts = service.getAccountsForUser(USER_ID, PAGEABLE);
 
             //THEN
             verify(userRepository, times(1)).existsById(USER_ID);
             verifyNoMoreInteractions(userRepository);
-            verify(accountRepository, times(1)).findByUserId(USER_ID);
+            verify(accountRepository, times(1)).findByUserId(USER_ID, PAGEABLE);
             verifyNoMoreInteractions(accountRepository);
 
-            assertEquals(BALANCE, accounts.get(0).balance());
-            assertEquals(PLN, accounts.get(0).currency());
+            assertEquals(BALANCE, accounts.stream().findFirst().get().balance());
+            assertEquals(PLN, accounts.stream().findFirst().get().currency());
+            assertEquals(1, accounts.getTotalElements());
+            assertEquals(1, accounts.getTotalPages());
         }
 
         @Test
@@ -62,7 +64,7 @@ public class AccountServiceTest
             when(userRepository.existsById(USER_ID)).thenReturn(false);
 
             //WHEN
-            assertThrows(UserNotFoundException.class, () -> service.obtainAccountsForUser(USER_ID));
+            assertThrows(UserNotFoundException.class, () -> service.getAccountsForUser(USER_ID, PAGEABLE));
 
             //THEN
             verify(userRepository, times(1)).existsById(USER_ID);
@@ -81,7 +83,7 @@ public class AccountServiceTest
             when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(account()));
 
             //WHEN
-            AccountResponse response = service.obtainAccount(ACCOUNT_ID);
+            AccountResponse response = service.getAccount(ACCOUNT_ID);
 
             //THEN
             verify(accountRepository, times(1)).findById(ACCOUNT_ID);
@@ -98,7 +100,7 @@ public class AccountServiceTest
             when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.empty());
 
             //WHEN
-            assertThrows(AccountNotFoundException.class, () -> service.obtainAccount(ACCOUNT_ID));
+            assertThrows(AccountNotFoundException.class, () -> service.getAccount(ACCOUNT_ID));
 
             //THEN
             verify(accountRepository, times(1)).findById(ACCOUNT_ID);

@@ -1,12 +1,12 @@
 package walletmanager.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import walletmanager.response.AccountResponse;
 import walletmanager.service.AccountService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -16,19 +16,15 @@ public class AccountController
     private final AccountService service;
 
     @GetMapping
-    public ResponseEntity<List<AccountResponse>> obtainAccountsForUser(@RequestParam Long userId)
+    public Page<AccountResponse> getAccountsForUser(@RequestParam Long userId, Pageable pageable)
     {
-        List<AccountResponse> accountResponses = service.obtainAccountsForUser(userId);
-
-        return ResponseEntity
-                .ok()
-                .body(accountResponses);
+        return service.getAccountsForUser(userId, pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountResponse> obtainAccount(@PathVariable Long id)
+    public ResponseEntity<AccountResponse> getAccount(@PathVariable Long id)
     {
-        AccountResponse response = service.obtainAccount(id);
+        AccountResponse response = service.getAccount(id);
 
         return ResponseEntity
                 .ok()

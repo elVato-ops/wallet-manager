@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import walletmanager.exception.TransactionValidationException;
 import walletmanager.utils.CurrencyConverter;
 
-import javax.swing.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Currency;
@@ -40,7 +39,7 @@ public class TransactionEntity
             throw new TransactionValidationException("Transaction currency cannot be null");
         }
 
-        if (amount.equals(BigDecimal.ZERO))
+        if (amount.compareTo(BigDecimal.ZERO) == 0)
         {
             throw new TransactionValidationException("Transaction amount cannot be 0");
         }

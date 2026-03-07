@@ -1,11 +1,11 @@
 package walletmanager.repository;
 
-import walletmanager.entity.AccountEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
+import walletmanager.entity.AccountEntity;
 
 public interface AccountRepository extends JpaRepository<AccountEntity, Long>
 {
-    List<AccountEntity> findByUserId(Long id);
+    Page<AccountEntity> findByUserId(Long id, Pageable pageable);
 }

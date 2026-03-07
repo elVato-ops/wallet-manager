@@ -2,6 +2,8 @@ package walletmanager.service;
 
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import walletmanager.entity.AccountEntity;
 import walletmanager.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -104,14 +106,14 @@ public class UserServiceTest
         public void returnsUsers()
         {
             //GIVEN
-            List<UserEntity> users = List.of(user(), otherUser());
-            when(userRepository.findAll()).thenReturn(users);
+            Page<UserEntity> userEntities = new PageImpl<>(List.of(user(), otherUser()));
+            when(userRepository.findAll(PAGEABLE)).thenReturn(userEntities);
 
             //WHEN
-            List<UserResponse> allUsers = service.getAllUsers();
+            Page<UserResponse> allUsers = service.getAllUsers(PAGEABLE);
 
             //THEN
-            verify(userRepository, times(1)).findAll();
+            verify(userRepository, times(1)).findAll(PAGEABLE);
             verifyNoMoreInteractions(userRepository);
 
             assertEquals(List.of(USER_NAME, OTHER_USER_NAME),

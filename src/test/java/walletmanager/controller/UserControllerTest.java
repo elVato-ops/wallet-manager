@@ -7,6 +7,10 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -157,18 +161,57 @@ public class UserControllerTest
             //GIVEN
             UserResponse userOne = new UserResponse(1L, "Bobek");
             UserResponse userTwo = new UserResponse(2L, "Nubek");
+            Page<UserResponse> userResponses = new PageImpl<>(List.of(userOne, userTwo));
 
-            when(service.getAllUsers()).thenReturn(List.of(userOne, userTwo));
+            when(service.getAllUsers(any(Pageable.class))).thenReturn(userResponses);
 
             //WHEN
             mockMvc.perform(get("/users"))
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].name", containsInAnyOrder("Bobek", "Nubek")))
-                    .andExpect(jsonPath("$[*].id", containsInAnyOrder(1, 2)));
+                    .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("Bobek", "Nubek")))
+                    .andExpect(jsonPath("$.content[*].id", containsInAnyOrder(1, 2)));
 
-            verify(service, times(1)).getAllUsers();
+            verify(service, times(1)).getAllUsers(any(Pageable.class));
+            verifyNoMoreInteractions(service);
+        }
+
+        @Test
+        public void returnsPaginatedUsers() throws Exception
+        {
+            //GIVEN
+            UserResponse userOne = new UserResponse(1L, "Bobek");
+            UserResponse userTwo = new UserResponse(2L, "Nubek");
+
+            Page<UserResponse> response =
+                    new PageImpl<>(
+                            List.of(userOne, userTwo),
+                            PageRequest.of(0, 2),
+                            5);
+
+            when(service.getAllUsers(any(Pageable.class))).thenReturn(response);
+
+            //WHEN
+            mockMvc.perform(get("/users")
+                    .param("page", "0")
+                    .param("size", "2"))
+
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size").value(2))
+                    .andExpect(jsonPath("$.number").value(0))
+                    .andExpect(jsonPath("$.totalElements").value(5))
+                    .andExpect(jsonPath("$.totalPages").value(3))
+
+            //AND
+                    .andExpect(jsonPath("$.content.length()").value(2))
+                    .andExpect(jsonPath("$.content[*].name",
+                            containsInAnyOrder("Bobek", "Nubek")))
+                    .andExpect(jsonPath("$.content[*].id",
+                            containsInAnyOrder(1, 2)));
+
+            verify(service, times(1)).getAllUsers(any(Pageable.class));
             verifyNoMoreInteractions(service);
         }
     }

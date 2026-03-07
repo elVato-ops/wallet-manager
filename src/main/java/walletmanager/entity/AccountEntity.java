@@ -24,7 +24,10 @@ public class AccountEntity
     private Long id;
 
     @Convert(converter = CurrencyConverter.class)
+    @Column(nullable = false)
     private Currency currency;
+
+    @Column(nullable = false)
     private BigDecimal balance;
 
     @ManyToOne(fetch = FetchType.LAZY)

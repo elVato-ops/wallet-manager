@@ -1,18 +1,18 @@
 package walletmanager.service;
 
-import walletmanager.exception.UserNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import walletmanager.entity.UserEntity;
+import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
-import walletmanager.entity.UserEntity;
 import walletmanager.utils.UserMapper;
-
-import java.util.List;
 
 import static walletmanager.utils.AccountMapper.toEntity;
 import static walletmanager.utils.AccountMapper.toResponse;
@@ -38,9 +38,10 @@ public class UserService
         return UserMapper.toResponse(userEntity);
     }
 
-    public List<UserResponse> getAllUsers()
+    public Page<UserResponse> getAllUsers(Pageable pageable)
     {
-        return UserMapper.toResponse(userRepository.findAll());
+        return userRepository.findAll(pageable)
+                .map(UserMapper::toResponse);
     }
 
     public AccountResponse createAccount(CreateAccountRequest request, Long userId)
