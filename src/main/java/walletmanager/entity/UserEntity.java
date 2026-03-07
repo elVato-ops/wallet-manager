@@ -1,12 +1,9 @@
 package walletmanager.entity;
 
-import lombok.NoArgsConstructor;
-import walletmanager.exception.UserValidationException;
 import jakarta.persistence.*;
 import lombok.Getter;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
+import walletmanager.exception.UserValidationException;
 
 @Entity
 @Table(name = "users")
@@ -20,9 +17,6 @@ public class UserEntity
 
     @Column(nullable = false)
     private String name;
-
-    @OneToMany(mappedBy = "user")
-    List<AccountEntity> accounts = new ArrayList<>();
 
     public UserEntity(String name)
     {

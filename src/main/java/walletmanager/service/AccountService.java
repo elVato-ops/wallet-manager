@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import walletmanager.entity.AccountEntity;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
@@ -16,6 +17,7 @@ import static walletmanager.utils.AccountMapper.toResponse;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class AccountService
 {
     private final UserRepository userRepository;

@@ -20,10 +20,13 @@ public class TransactionEntity
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private BigDecimal amount;
 
     @Convert(converter = CurrencyConverter.class)
+    @Column(nullable = false)
     private Currency currency;
+
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)

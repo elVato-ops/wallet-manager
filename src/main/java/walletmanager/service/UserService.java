@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import walletmanager.entity.UserEntity;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
@@ -24,12 +25,14 @@ public class UserService
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
 
+    @Transactional
     public UserResponse createUser(CreateUserRequest request)
     {
         UserEntity userEntity = UserMapper.toEntity(request);
         return UserMapper.toResponse(userRepository.save(userEntity));
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUser(Long id)
     {
         UserEntity userEntity = userRepository.findById(id)
@@ -38,12 +41,14 @@ public class UserService
         return UserMapper.toResponse(userEntity);
     }
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable)
     {
         return userRepository.findAll(pageable)
                 .map(UserMapper::toResponse);
     }
 
+    @Transactional
     public AccountResponse createAccount(CreateAccountRequest request, Long userId)
     {
         UserEntity user = userRepository.findById(userId)
