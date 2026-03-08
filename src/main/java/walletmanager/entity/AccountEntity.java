@@ -34,6 +34,9 @@ public class AccountEntity
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    @Version
+    Long version;
+
     public AccountEntity(Currency currency, BigDecimal balance, UserEntity user)
     {
         if (currency == null)
@@ -62,7 +65,7 @@ public class AccountEntity
         }
         else if (balance.compareTo(amount) < 0)
         {
-            throw new InsufficientFundsException(amount, balance);
+            throw new InsufficientFundsException();
         }
         else balance = balance.subtract(amount);
     }

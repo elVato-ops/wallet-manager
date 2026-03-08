@@ -321,7 +321,7 @@ public class UserControllerTest
             String json = """
             {
               "currency": null,
-              "balance": "100"
+              "amount": "100"
             }""";
 
             //WHEN

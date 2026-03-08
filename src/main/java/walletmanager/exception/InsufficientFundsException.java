@@ -1,11 +1,9 @@
 package walletmanager.exception;
 
-import java.math.BigDecimal;
-
 public class InsufficientFundsException extends RuntimeException
 {
-    public InsufficientFundsException(BigDecimal amount, BigDecimal balance)
+    public InsufficientFundsException()
     {
-        super("The amount " + amount + " is higher than the account balance " + balance);
+        super("You have insufficient funds to perform this operation");
     }
 }
