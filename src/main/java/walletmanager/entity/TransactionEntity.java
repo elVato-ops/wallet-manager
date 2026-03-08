@@ -42,9 +42,14 @@ public class TransactionEntity
             throw new TransactionValidationException("Transaction currency cannot be null");
         }
 
-        if (amount.compareTo(BigDecimal.ZERO) == 0)
+        if (amount.compareTo(BigDecimal.ZERO) <= 0)
         {
-            throw new TransactionValidationException("Transaction amount cannot be 0");
+            throw new TransactionValidationException("Transaction amount must be positive");
+        }
+
+        if (fromAccount == null || toAccount == null)
+        {
+            throw new TransactionValidationException("Transaction accounts cannot be null");
         }
 
         this.amount = amount;

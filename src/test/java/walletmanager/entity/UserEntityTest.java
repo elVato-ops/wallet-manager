@@ -1,6 +1,5 @@
-package walletmanager.user;
+package walletmanager.entity;
 
-import walletmanager.entity.UserEntity;
 import walletmanager.exception.UserValidationException;
 import org.junit.jupiter.api.Test;
 

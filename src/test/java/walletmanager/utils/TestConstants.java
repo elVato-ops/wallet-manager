@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import walletmanager.entity.AccountEntity;
 import walletmanager.entity.UserEntity;
+import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
+import walletmanager.response.TransactionResponse;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -22,8 +24,12 @@ public class TestConstants
     public static final Currency PLN = Currency.getInstance("PLN");
     public static final BigDecimal BALANCE = BigDecimal.valueOf(100L);
 
-    public static final Pageable PAGEABLE = PageRequest.of(0, 10);
+    public static final Long TRANSACTION_ID = 10L;
+    public static final Long FROM_ACCOUNT_ID = 11L;
+    public static final Long TO_ACCOUNT_ID = 12L;
+    public static final BigDecimal TRANSFER_AMOUNT = new BigDecimal(50);
 
+    public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
     public static AccountEntity account()
     {
@@ -53,5 +59,15 @@ public class TestConstants
     public static Page<AccountResponse> accountPageResponse()
     {
         return new PageImpl<>(List.of(accountResponse()));
+    }
+
+    public static TransactionResponse transactionResponse()
+    {
+        return new TransactionResponse(TRANSACTION_ID, FROM_ACCOUNT_ID, TO_ACCOUNT_ID, PLN, TRANSFER_AMOUNT);
+    }
+
+    public static TransferRequest transferRequest()
+    {
+        return new TransferRequest(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
     }
 }

@@ -15,15 +15,12 @@ public class TransferService
 
     public TransactionResponse transfer(TransferRequest request)
     {
-        Long fromAccountId = request.fromAccountId();
-        Long toAccountId = request.toAccountId();
-
         int retries = 3;
         while(retries > 0)
         {
             try
             {
-                return transferManager.transfer(fromAccountId, toAccountId, request.amount());
+                return transferManager.transfer(request.fromAccountId(), request.toAccountId(), request.amount());
             }
             catch (OptimisticLockException e)
             {

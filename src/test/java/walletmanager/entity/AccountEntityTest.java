@@ -1,8 +1,7 @@
-package walletmanager.user;
+package walletmanager.entity;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import walletmanager.entity.AccountEntity;
 import walletmanager.exception.AccountValidationException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.exception.InsufficientFundsException;
