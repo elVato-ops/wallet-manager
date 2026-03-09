@@ -78,4 +78,9 @@ public class AccountEntity
         }
         else balance = balance.add(amount);
     }
+
+    public boolean hasCurrency(Currency currency)
+    {
+        return this.currency.equals(currency);
+    }
 }

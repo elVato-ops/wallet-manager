@@ -27,12 +27,15 @@ public class TransactionEntity
     @Column(nullable = false)
     private Currency currency;
 
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private AccountEntity fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private AccountEntity toAccount;
 
     public TransactionEntity(BigDecimal amount, Currency currency, AccountEntity fromAccount, AccountEntity toAccount)

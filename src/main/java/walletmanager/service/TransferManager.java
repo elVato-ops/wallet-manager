@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import walletmanager.entity.AccountEntity;
 import walletmanager.entity.TransactionEntity;
 import walletmanager.exception.AccountNotFoundException;
+import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.TransactionRepository;
@@ -43,6 +44,11 @@ public class TransferManager
 
         AccountEntity toAccount = accountRepository.findById(toAccountId)
                 .orElseThrow(() -> new AccountNotFoundException(toAccountId));
+
+        if (!fromAccount.hasCurrency(toAccount.getCurrency()))
+        {
+            throw new DifferentCurrencyException(fromAccount.getCurrency(), toAccount.getCurrency());
+        }
 
         fromAccount.withdraw(amount);
         toAccount.deposit(amount);

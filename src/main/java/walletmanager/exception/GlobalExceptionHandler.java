@@ -56,4 +56,18 @@ public class GlobalExceptionHandler
     {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler(ConcurrentTransferException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConcurrentTransferException(ConcurrentTransferException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(DifferentCurrencyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDifferentCurrencyException(DifferentCurrencyException e)
+    {
+        return new ErrorResponse(e.getMessage());
+    }
 }

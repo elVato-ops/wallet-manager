@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import walletmanager.entity.AccountEntity;
 import walletmanager.entity.TransactionEntity;
 import walletmanager.exception.AccountNotFoundException;
+import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.exception.InsufficientFundsException;
 import walletmanager.repository.AccountRepository;
@@ -120,6 +121,27 @@ public class TransferManagerTest
 
         //WHEN
         assertThrows(InsufficientFundsException.class, () -> transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, BigDecimal.valueOf(1000L)));
+
+        //THEN
+        verify(accountRepository, times(2)).findById(anyLong());
+        verifyNoMoreInteractions(accountRepository);
+        verifyNoInteractions(transactionRepository);
+
+        assertEquals(BigDecimal.valueOf(120), fromAccount.getBalance());
+        assertEquals(BigDecimal.valueOf(30), toAccount.getBalance());
+    }
+
+    @Test
+    public void throwDifferentCurrency_ifDifferentCurrencies()
+    {
+        AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
+        when(accountRepository.findById(FROM_ACCOUNT_ID)).thenReturn(Optional.of(fromAccount));
+
+        AccountEntity toAccount = new AccountEntity(EUR, BigDecimal.valueOf(30), user());
+        when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
+
+        //WHEN
+        assertThrows(DifferentCurrencyException.class, () -> transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, BigDecimal.valueOf(10L)));
 
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());

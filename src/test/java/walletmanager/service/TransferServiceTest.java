@@ -6,9 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import walletmanager.exception.InsufficientFundsException;
+import walletmanager.exception.ConcurrentTransferException;
 import walletmanager.response.TransactionResponse;
-
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,6 +75,6 @@ public class TransferServiceTest
                 .thenThrow(OptimisticLockException.class);
 
         //WHEN
-        assertThrows(InsufficientFundsException.class, () -> service.transfer(transferRequest()));
+        assertThrows(ConcurrentTransferException.class, () -> service.transfer(transferRequest()));
     }
 }

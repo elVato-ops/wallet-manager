@@ -22,6 +22,7 @@ public class TestConstants
 
     public static final Long ACCOUNT_ID = 997L;
     public static final Currency PLN = Currency.getInstance("PLN");
+    public static final Currency EUR = Currency.getInstance("EUR");
     public static final BigDecimal BALANCE = BigDecimal.valueOf(100L);
 
     public static final Long TRANSACTION_ID = 10L;

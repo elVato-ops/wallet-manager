@@ -3,7 +3,7 @@ package walletmanager.service;
 import jakarta.persistence.OptimisticLockException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import walletmanager.exception.InsufficientFundsException;
+import walletmanager.exception.ConcurrentTransferException;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.TransactionResponse;
 
@@ -28,6 +28,6 @@ public class TransferService
             }
         }
 
-        throw new InsufficientFundsException();
+        throw new ConcurrentTransferException("There was a concurrency conflict. Please try again");
     }
 }
