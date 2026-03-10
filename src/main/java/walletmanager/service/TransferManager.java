@@ -10,11 +10,8 @@ import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.TransactionRepository;
-import walletmanager.response.TransactionResponse;
 
 import java.math.BigDecimal;
-
-import static walletmanager.utils.TransactionMapper.toResponse;
 
 @Service
 @AllArgsConstructor
@@ -24,7 +21,7 @@ public class TransferManager
     private final TransactionRepository transactionRepository;
 
     @Transactional
-    public TransactionResponse transfer(Long fromAccountId, Long toAccountId, BigDecimal amount)
+    public TransactionEntity transfer(Long fromAccountId, Long toAccountId, BigDecimal amount)
     {
         if (fromAccountId.equals(toAccountId))
         {
@@ -34,7 +31,7 @@ public class TransferManager
         TransactionEntity transactionEntity = performTransaction(fromAccountId, toAccountId, amount);
         transactionRepository.save(transactionEntity);
 
-        return toResponse(transactionEntity);
+        return transactionEntity;
     }
 
     private TransactionEntity performTransaction(Long fromAccountId, Long toAccountId, BigDecimal amount)

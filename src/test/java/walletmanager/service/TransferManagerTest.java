@@ -13,7 +13,6 @@ import walletmanager.exception.IllegalTransactionException;
 import walletmanager.exception.InsufficientFundsException;
 import walletmanager.repository.AccountRepository;
 import walletmanager.repository.TransactionRepository;
-import walletmanager.response.TransactionResponse;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -37,7 +36,7 @@ public class TransferManagerTest
     private TransactionRepository transactionRepository;
 
     @Test
-    public void returnsResponse_whenInputValid()
+    public void returnsEntity_whenInputValid()
     {
         //GIVEN
         AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
@@ -47,7 +46,7 @@ public class TransferManagerTest
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
         //WHEN
-        TransactionResponse response = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
+        TransactionEntity entity = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
 
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
@@ -57,8 +56,8 @@ public class TransferManagerTest
 
         assertEquals(BigDecimal.valueOf(70), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(80), toAccount.getBalance());
-        assertEquals(TRANSFER_AMOUNT, response.amount());
-        assertEquals(PLN, response.currency());
+        assertEquals(TRANSFER_AMOUNT, entity.getAmount());
+        assertEquals(PLN, entity.getCurrency());
     }
 
     @Test

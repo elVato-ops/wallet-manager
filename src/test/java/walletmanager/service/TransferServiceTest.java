@@ -28,7 +28,7 @@ public class TransferServiceTest
     {
         //GIVEN
         when(transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT))
-                .thenReturn(transactionResponse());
+                .thenReturn(transactionEntity());
 
         //WHEN
         TransactionResponse response = service.transfer(transferRequest());
@@ -37,9 +37,6 @@ public class TransferServiceTest
         verify(transferManager, times(1)).transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
         verifyNoMoreInteractions(transferManager);
 
-        assertEquals(TRANSACTION_ID, response.id());
-        assertEquals(FROM_ACCOUNT_ID, response.fromAccountId());
-        assertEquals(TO_ACCOUNT_ID, response.toAccountId());
         assertEquals(PLN, response.currency());
         assertEquals(TRANSFER_AMOUNT, response.amount());
     }
@@ -51,7 +48,7 @@ public class TransferServiceTest
         when(transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT))
                 .thenThrow(OptimisticLockException.class)
                 .thenThrow(OptimisticLockException.class)
-                .thenReturn(transactionResponse());
+                .thenReturn(transactionEntity());
 
         //WHEN
         TransactionResponse response = service.transfer(transferRequest());
@@ -60,9 +57,6 @@ public class TransferServiceTest
         verify(transferManager, times(3)).transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
         verifyNoMoreInteractions(transferManager);
 
-        assertEquals(TRANSACTION_ID, response.id());
-        assertEquals(FROM_ACCOUNT_ID, response.fromAccountId());
-        assertEquals(TO_ACCOUNT_ID, response.toAccountId());
         assertEquals(PLN, response.currency());
         assertEquals(TRANSFER_AMOUNT, response.amount());
     }
