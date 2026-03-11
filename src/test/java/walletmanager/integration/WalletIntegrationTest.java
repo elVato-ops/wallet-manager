@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
@@ -111,13 +112,12 @@ public class WalletIntegrationTest
     {
         //GIVEN
         Long userId = createUser(USER_NAME);
-        Long accountId = createAccount(createAccountRequest(), userId);
+        Long accountId = createAccount(userId, createAccountRequest());
 
         //WHEN
-        mockMvc.perform(get("/accounts/" + accountId))
+        getAccount(accountId)
 
         //THEN
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(toInt(accountId)))
                 .andExpect(jsonPath("$.currency").value(PLN.toString()))
                 .andExpect(jsonPath("$.balance").value(toInt(BALANCE)))
@@ -130,8 +130,8 @@ public class WalletIntegrationTest
         //GIVEN
         Long userId = createUser(USER_NAME);
 
-        Long firstAccountId = createAccount(createAccountRequest(), userId);
-        Long secondAccountId = createAccount(createOtherAccountRequest(), userId);
+        Long firstAccountId = createAccount(userId, createAccountRequest());
+        Long secondAccountId = createAccount(userId, createOtherAccountRequest());
 
         transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
         transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
@@ -165,19 +165,17 @@ public class WalletIntegrationTest
         //GIVEN
         Long userId = createUser(USER_NAME);
 
-        Long firstAccountId = createAccount(createAccountRequest(), userId);
-        Long secondAccountId = createAccount(createOtherAccountRequest(), userId);
+        Long firstAccountId = createAccount(userId, createAccountRequest());
+        Long secondAccountId = createAccount(userId, createOtherAccountRequest());
 
         transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
         transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
 
         //WHEN
-        MvcResult firstAccountResult = mockMvc.perform(get("/accounts/" + firstAccountId))
-                .andExpect(status().isOk())
+        MvcResult firstAccountResult = getAccount(firstAccountId)
                 .andReturn();
 
-        MvcResult secondAccountResult = mockMvc.perform(get("/accounts/" + secondAccountId))
-                .andExpect(status().isOk())
+        MvcResult secondAccountResult = getAccount(secondAccountId)
                 .andReturn();
 
         //THEN
@@ -205,7 +203,7 @@ public class WalletIntegrationTest
         return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserResponse.class).id();
     }
 
-    private Long createAccount(CreateAccountRequest request, Long userId) throws Exception
+    private Long createAccount(Long userId, CreateAccountRequest request) throws Exception
     {
         MvcResult createAccountResult = mockMvc.perform(post("/users/" + userId + "/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -223,7 +221,12 @@ public class WalletIntegrationTest
         mockMvc.perform(post("/transfers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                .andExpect(status().isCreated());
+    }
+
+    private ResultActions getAccount(Long id) throws Exception
+    {
+        return mockMvc.perform(get("/accounts/" + id + "/transactions"))
+                .andExpect(status().isOk());
     }
 }
