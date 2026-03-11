@@ -2,7 +2,6 @@ package walletmanager.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,15 +9,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import walletmanager.repository.AccountRepository;
-import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
+import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.math.BigDecimal;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,37 +35,13 @@ public class WalletIntegrationTest
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    AccountRepository accountRepository;
-
-    @BeforeEach
-    public void setup()
-    {
-        userRepository.deleteAll();
-    }
-
     @Test
-    public void returns200_whenCreateUser_andFetchUser() throws Exception
+    public void returnsUser_whenCreateAndFetchUser() throws Exception
     {
         //GIVEN
-        String json = """
-            {
-              "name": "%s"
-            }"""
-                .formatted(USER_NAME);
+        Long userId = createUser(USER_NAME);
 
         //WHEN
-        MvcResult mvcResult = mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        Long userId = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserResponse.class).id();
-
         mockMvc.perform(get("/users/" + userId)
                 .param("page", "0")
                 .param("size", "2"))
@@ -75,61 +50,17 @@ public class WalletIntegrationTest
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(USER_NAME))
                 .andExpect(jsonPath("$.id").value(userId));
-
-        assertTrue(userRepository.existsById(userId));
     }
 
     @Test
-    public void returnsPaginatedUsers_whenCreateThreeUsers_andFetchAllUsers() throws Exception
+    public void returnsPaginatedUsers_whenCreateAndFetchUsers() throws Exception
     {
         //GIVEN
-        String firstUserJson = """
-            {
-              "name": "%s"
-            }"""
-                .formatted(USER_NAME);
-
-        String secondUserJson = """
-            {
-              "name": "%s"
-            }"""
-                .formatted(SECOND_USER_NAME);
-
-        String thirdUserJson = """
-            {
-              "name": "%s"
-            }"""
-                .formatted(THIRD_USER_NAME);
+        Long firstUserId = createUser(USER_NAME);
+        Long secondUserId = createUser(SECOND_USER_NAME);
+        Long thirdUserId = createUser(THIRD_USER_NAME);
 
         //WHEN
-        MvcResult firstResult = mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(firstUserJson))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        MvcResult secondResult = mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(secondUserJson))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        MvcResult thirdResult = mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(thirdUserJson))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        //THEN
-        Long firstUserId = objectMapper.readValue(firstResult.getResponse().getContentAsString(), UserResponse.class).id();
-        Long secondUserId = objectMapper.readValue(secondResult.getResponse().getContentAsString(), UserResponse.class).id();
-        Long thirdUserId = objectMapper.readValue(thirdResult.getResponse().getContentAsString(), UserResponse.class).id();
-
-        assertTrue(userRepository.existsById(firstUserId));
-        assertTrue(userRepository.existsById(secondUserId));
-        assertTrue(userRepository.existsById(thirdUserId));
-
-        //AND WHEN
         mockMvc.perform(get("/users")
                         .param("page", "0")
                         .param("size", "2")
@@ -176,44 +107,13 @@ public class WalletIntegrationTest
     }
 
     @Test
-    public void returns200_whenCreateAccountForUser_fetchAccount() throws Exception
+    public void returnsAccount_whenFetchAccountForUser() throws Exception
     {
         //GIVEN
-        String json = """
-            {
-              "name": "%s"
-            }"""
-                .formatted(USER_NAME);
+        Long userId = createUser(USER_NAME);
+        Long accountId = createAccount(createAccountRequest(), userId);
 
         //WHEN
-        MvcResult mvcResult = mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-
-        //THEN
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        Long userId = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserResponse.class).id();
-        assertTrue(userRepository.existsById(userId));
-
-        //AND GIVEN
-        CreateAccountRequest createAccountRequest =
-                new CreateAccountRequest(PLN, BALANCE);
-
-        //WHEN
-        MvcResult createAccountResult = mockMvc.perform(post("/users/" + userId + "/accounts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(createAccountRequest)))
-
-        //THEN
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        Long accountId = objectMapper.readValue(createAccountResult.getResponse().getContentAsString(), AccountResponse.class).id();
-        assertTrue(accountRepository.existsById(accountId));
-
-        //AND WHEN
         mockMvc.perform(get("/accounts/" + accountId))
 
         //THEN
@@ -222,5 +122,108 @@ public class WalletIntegrationTest
                 .andExpect(jsonPath("$.currency").value(PLN.toString()))
                 .andExpect(jsonPath("$.balance").value(toInt(BALANCE)))
                 .andExpect(jsonPath("$.userId").value(toInt(userId)));
+    }
+
+    @Test
+    public void createsTransactions_whenTransferBetweenAccounts() throws Exception
+    {
+        //GIVEN
+        Long userId = createUser(USER_NAME);
+
+        Long firstAccountId = createAccount(createAccountRequest(), userId);
+        Long secondAccountId = createAccount(createOtherAccountRequest(), userId);
+
+        transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
+        transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
+
+        //WHEN
+        mockMvc.perform(get("/accounts/" + firstAccountId + "/transactions"))
+
+        //THEN
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[*].fromAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
+                .andExpect(jsonPath("$.content[*].toAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
+                .andExpect(jsonPath("$.content[*].currency", containsInAnyOrder(PLN.toString(), PLN.toString())))
+                .andExpect(jsonPath("$.content[*].amount", containsInAnyOrder(20,  50)));
+
+        //AND WHEN
+        mockMvc.perform(get("/accounts/" + secondAccountId + "/transactions"))
+
+        //THEN
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[*].fromAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
+                .andExpect(jsonPath("$.content[*].toAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
+                .andExpect(jsonPath("$.content[*].currency", containsInAnyOrder(PLN.toString(), PLN.toString())))
+                .andExpect(jsonPath("$.content[*].amount", containsInAnyOrder(20,  50)));
+    }
+
+    @Test
+    public void updatesBalances_whenTransferBetweenAccounts() throws Exception
+    {
+        //GIVEN
+        Long userId = createUser(USER_NAME);
+
+        Long firstAccountId = createAccount(createAccountRequest(), userId);
+        Long secondAccountId = createAccount(createOtherAccountRequest(), userId);
+
+        transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
+        transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
+
+        //WHEN
+        MvcResult firstAccountResult = mockMvc.perform(get("/accounts/" + firstAccountId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult secondAccountResult = mockMvc.perform(get("/accounts/" + secondAccountId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //THEN
+        AccountResponse firstAccount = objectMapper.readValue(firstAccountResult.getResponse().getContentAsString(), AccountResponse.class);
+        AccountResponse secondAccount = objectMapper.readValue(secondAccountResult.getResponse().getContentAsString(), AccountResponse.class);
+
+        assertEquals(BigDecimal.valueOf(130), firstAccount.balance());
+        assertEquals(BigDecimal.valueOf(170), secondAccount.balance());
+    }
+
+    private Long createUser(String userName) throws Exception
+    {
+        String json = """
+            {
+              "name": "%s"
+            }"""
+                .formatted(userName);
+
+        MvcResult mvcResult = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserResponse.class).id();
+    }
+
+    private Long createAccount(CreateAccountRequest request, Long userId) throws Exception
+    {
+        MvcResult createAccountResult = mockMvc.perform(post("/users/" + userId + "/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        return objectMapper.readValue(createAccountResult.getResponse().getContentAsString(), AccountResponse.class).id();
+    }
+
+    private void transfer(Long firstAccountId, Long secondAccountId, BigDecimal amount) throws Exception
+    {
+        TransferRequest request = new TransferRequest(firstAccountId, secondAccountId, amount);
+
+        mockMvc.perform(post("/transfers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isCreated())
+                .andReturn();
     }
 }

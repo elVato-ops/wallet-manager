@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import walletmanager.entity.AccountEntity;
 import walletmanager.entity.TransactionEntity;
 import walletmanager.entity.UserEntity;
+import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.response.TransactionResponse;
@@ -26,6 +27,7 @@ public class TestConstants
     public static final Currency PLN = Currency.getInstance("PLN");
     public static final Currency EUR = Currency.getInstance("EUR");
     public static final BigDecimal BALANCE = BigDecimal.valueOf(100L);
+    public static final BigDecimal OTHER_BALANCE = BigDecimal.valueOf(200L);
 
     public static final Long TRANSACTION_ID = 10L;
     public static final Long OTHER_TRANSACTION_ID = 910L;
@@ -34,7 +36,7 @@ public class TestConstants
     public static final Long TO_ACCOUNT_ID = 12L;
     public static final Long OTHER_TO_ACCOUNT_ID = 912L;
     public static final BigDecimal TRANSFER_AMOUNT = new BigDecimal(50);
-    public static final BigDecimal OTHER_TRANSFER_AMOUNT = new BigDecimal(950);
+    public static final BigDecimal OTHER_TRANSFER_AMOUNT = new BigDecimal(150);
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
@@ -86,6 +88,16 @@ public class TestConstants
     public static TransactionResponse otherTransactionResponse()
     {
         return new TransactionResponse(OTHER_TRANSACTION_ID, OTHER_FROM_ACCOUNT_ID, OTHER_TO_ACCOUNT_ID, EUR, OTHER_TRANSFER_AMOUNT);
+    }
+
+    public static CreateAccountRequest createAccountRequest()
+    {
+        return new CreateAccountRequest(PLN, BALANCE);
+    }
+
+    public static CreateAccountRequest createOtherAccountRequest()
+    {
+        return new CreateAccountRequest(PLN, OTHER_BALANCE);
     }
 
     public static TransferRequest transferRequest()
