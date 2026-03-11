@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import walletmanager.response.AccountResponse;
+import walletmanager.response.TransactionResponse;
 import walletmanager.service.AccountService;
 
 @RestController
@@ -29,5 +30,11 @@ public class AccountController
         return ResponseEntity
                 .ok()
                 .body(response);
+    }
+
+    @GetMapping("/{id}/transactions")
+    public Page<TransactionResponse> getTransactions(@PathVariable Long id, Pageable pageable)
+    {
+        return service.getTransactionsForAccount(id, pageable);
     }
 }

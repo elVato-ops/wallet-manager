@@ -47,9 +47,6 @@ public class TransferManager
             throw new DifferentCurrencyException(fromAccount.getCurrency(), toAccount.getCurrency());
         }
 
-        fromAccount.withdraw(amount);
-        toAccount.deposit(amount);
-
-        return new TransactionEntity(amount, fromAccount.getCurrency(), fromAccount, toAccount);
+        return TransactionEntity.transfer(fromAccount, toAccount, amount);
     }
 }

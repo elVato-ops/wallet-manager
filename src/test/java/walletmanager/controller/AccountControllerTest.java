@@ -5,12 +5,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
+import walletmanager.response.TransactionResponse;
 import walletmanager.service.AccountService;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,10 +48,10 @@ public class AccountControllerTest
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[*].id").value(Integer.valueOf(ACCOUNT_ID.toString())))
+                    .andExpect(jsonPath("$.content[*].id").value(toInt(ACCOUNT_ID)))
                     .andExpect(jsonPath("$.content[*].currency").value(PLN.toString()))
-                    .andExpect(jsonPath("$.content[*].balance").value(Integer.valueOf(BALANCE.toString())))
-                    .andExpect(jsonPath("$.content[*].userId").value(Integer.valueOf(USER_ID.toString())));
+                    .andExpect(jsonPath("$.content[*].balance").value(toInt(BALANCE)))
+                    .andExpect(jsonPath("$.content[*].userId").value(toInt(USER_ID)));
 
             verify(service, times(1)).getAccountsForUser(eq(USER_ID), any(Pageable.class));
             verifyNoMoreInteractions(service);
@@ -134,6 +141,51 @@ public class AccountControllerTest
                     .andExpect(status().isBadRequest());
 
             verify(service, never()).getAccount(anyLong());
+        }
+    }
+
+    @Nested
+    class GetTransactions
+    {
+        @Test
+        public void returns200_whenRequestValid() throws Exception
+        {
+            //GIVEN
+            Page<TransactionResponse> response =
+                    new PageImpl<>(
+                            List.of(transactionResponse(), otherTransactionResponse()),
+                            PageRequest.of(0, 2),
+                            5);
+
+            when(service.getTransactionsForAccount(eq(17L), any(Pageable.class))).thenReturn(response);
+
+            //WHEN
+            mockMvc.perform(get("/accounts/17/transactions")
+                    .param("page", "0")
+                    .param("size", "2"))
+
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size").value(2))
+                    .andExpect(jsonPath("$.number").value(0))
+                    .andExpect(jsonPath("$.totalElements").value(5))
+                    .andExpect(jsonPath("$.totalPages").value(3))
+
+                    //AND
+                    .andExpect(jsonPath("$.content.length()").value(2))
+                    .andExpect(jsonPath("$.content[*].id",
+                            containsInAnyOrder(toInt(TRANSACTION_ID), toInt(OTHER_TRANSACTION_ID))))
+                    .andExpect(jsonPath("$.content[*].fromAccountId",
+                            containsInAnyOrder(toInt(FROM_ACCOUNT_ID), toInt(OTHER_FROM_ACCOUNT_ID))))
+                    .andExpect(jsonPath("$.content[*].toAccountId",
+                            containsInAnyOrder(toInt(TO_ACCOUNT_ID), toInt(OTHER_TO_ACCOUNT_ID))))
+                    .andExpect(jsonPath("$.content[*].currency",
+                            containsInAnyOrder(PLN.toString(), EUR.toString())))
+                    .andExpect(jsonPath("$.content[*].amount",
+                            containsInAnyOrder(toInt(TRANSFER_AMOUNT), toInt(OTHER_TRANSFER_AMOUNT))));
+
+            verify(service, times(1)).getTransactionsForAccount(eq(17L), any(Pageable.class));
+            verifyNoMoreInteractions(service);
         }
     }
 }

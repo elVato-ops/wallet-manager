@@ -61,4 +61,12 @@ public class TransactionEntity
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
     }
+
+    public static TransactionEntity transfer(AccountEntity fromAccount, AccountEntity toAccount, BigDecimal amount)
+    {
+        fromAccount.withdraw(amount);
+        toAccount.deposit(amount);
+
+        return new TransactionEntity (amount, fromAccount.getCurrency(), fromAccount, toAccount);
+    }
 }

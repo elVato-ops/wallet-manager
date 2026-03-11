@@ -116,7 +116,7 @@ public class UserServiceTest
             verify(userRepository, times(1)).findAll(PAGEABLE);
             verifyNoMoreInteractions(userRepository);
 
-            assertEquals(List.of(USER_NAME, OTHER_USER_NAME),
+            assertEquals(List.of(USER_NAME, SECOND_USER_NAME),
                     allUsers.stream()
                             .map(UserResponse::name)
                             .collect(Collectors.toList()));

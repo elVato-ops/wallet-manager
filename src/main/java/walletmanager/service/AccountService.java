@@ -9,9 +9,12 @@ import walletmanager.entity.AccountEntity;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
+import walletmanager.repository.TransactionRepository;
 import walletmanager.repository.UserRepository;
 import walletmanager.response.AccountResponse;
+import walletmanager.response.TransactionResponse;
 import walletmanager.utils.AccountMapper;
+import walletmanager.utils.TransactionMapper;
 
 import static walletmanager.utils.AccountMapper.toResponse;
 
@@ -22,6 +25,7 @@ public class AccountService
 {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     public Page<AccountResponse> getAccountsForUser(Long id, Pageable pageable)
     {
@@ -40,5 +44,11 @@ public class AccountService
                 .orElseThrow(() -> new AccountNotFoundException(id));
 
         return toResponse(account);
+    }
+
+    public Page<TransactionResponse> getTransactionsForAccount(Long id, Pageable pageable)
+    {
+        return transactionRepository.findTransactionsForAccount(id, pageable)
+                .map(TransactionMapper::toResponse);
     }
 }

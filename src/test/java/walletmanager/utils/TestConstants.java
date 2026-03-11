@@ -19,7 +19,8 @@ public class TestConstants
 {
     public static final Long USER_ID = 17L;
     public static final String USER_NAME = "Bobek";
-    public static final String OTHER_USER_NAME = "Chlebek";
+    public static final String SECOND_USER_NAME = "Chlebek";
+    public static final String THIRD_USER_NAME = "Dudek";
 
     public static final Long ACCOUNT_ID = 997L;
     public static final Currency PLN = Currency.getInstance("PLN");
@@ -27,9 +28,13 @@ public class TestConstants
     public static final BigDecimal BALANCE = BigDecimal.valueOf(100L);
 
     public static final Long TRANSACTION_ID = 10L;
+    public static final Long OTHER_TRANSACTION_ID = 910L;
     public static final Long FROM_ACCOUNT_ID = 11L;
+    public static final Long OTHER_FROM_ACCOUNT_ID = 911L;
     public static final Long TO_ACCOUNT_ID = 12L;
+    public static final Long OTHER_TO_ACCOUNT_ID = 912L;
     public static final BigDecimal TRANSFER_AMOUNT = new BigDecimal(50);
+    public static final BigDecimal OTHER_TRANSFER_AMOUNT = new BigDecimal(950);
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
@@ -55,7 +60,7 @@ public class TestConstants
 
     public static UserEntity otherUser()
     {
-        return new UserEntity(OTHER_USER_NAME);
+        return new UserEntity(SECOND_USER_NAME);
     }
 
     public static Page<AccountEntity> accountPageEntity()
@@ -78,8 +83,23 @@ public class TestConstants
         return new TransactionResponse(TRANSACTION_ID, FROM_ACCOUNT_ID, TO_ACCOUNT_ID, PLN, TRANSFER_AMOUNT);
     }
 
+    public static TransactionResponse otherTransactionResponse()
+    {
+        return new TransactionResponse(OTHER_TRANSACTION_ID, OTHER_FROM_ACCOUNT_ID, OTHER_TO_ACCOUNT_ID, EUR, OTHER_TRANSFER_AMOUNT);
+    }
+
     public static TransferRequest transferRequest()
     {
         return new TransferRequest(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
+    }
+
+    public static int toInt(Long value)
+    {
+        return Integer.parseInt(value.toString());
+    }
+
+    public static int toInt(BigDecimal value)
+    {
+        return Integer.parseInt(value.toString());
     }
 }
