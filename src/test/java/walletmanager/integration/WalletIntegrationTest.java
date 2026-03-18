@@ -2,6 +2,7 @@ package walletmanager.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
@@ -35,6 +37,15 @@ public class WalletIntegrationTest
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @BeforeEach
+    public void cleanDatabase()
+    {
+        userRepository.deleteAll();
+    }
 
     @Test
     public void returnsUser_whenCreateAndFetchUser() throws Exception
@@ -226,7 +237,7 @@ public class WalletIntegrationTest
 
     private ResultActions getAccount(Long id) throws Exception
     {
-        return mockMvc.perform(get("/accounts/" + id + "/transactions"))
+        return mockMvc.perform(get("/accounts/" + id))
                 .andExpect(status().isOk());
     }
 }
