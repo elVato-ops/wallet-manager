@@ -29,12 +29,14 @@ public class TransferController
     private final TransferService service;
 
     @Operation(summary = "Transfer money between accounts",
-                description = "Transfers a specified amount from one account to the other. Fails if balance is insufficient or currency doesn't match.")
+                description = "Transfers a specified amount from one account to another. Fails if balance is insufficient or currency doesn't match.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Transfer successful",
                 content = @Content(schema = @Schema(implementation = TransactionResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Request invalid"),
-            @ApiResponse(responseCode = "404", description = "Account not found"),
+            @ApiResponse(responseCode = "400", description = "Request invalid",
+                    content = @Content(schema = @Schema(implementation = org.springframework.web.ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Account not found",
+                    content = @Content(schema = @Schema(implementation = org.springframework.web.ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "Business validation error",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
