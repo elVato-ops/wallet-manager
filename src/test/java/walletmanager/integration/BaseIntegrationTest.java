@@ -69,19 +69,23 @@ public abstract class BaseIntegrationTest
                         .content(objectMapper.writeValueAsBytes(request)));
     }
 
-    public void transfer(Long firstAccountId, Long secondAccountId, BigDecimal amount) throws Exception
+    public ResultActions transfer(Long firstAccountId, Long secondAccountId, BigDecimal amount) throws Exception
     {
         TransferRequest request = new TransferRequest(firstAccountId, secondAccountId, amount);
 
-        mockMvc.perform(post("/transfers")
+        return mockMvc.perform(post("/transfers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isCreated());
+                        .content(objectMapper.writeValueAsBytes(request)));
     }
 
     public ResultActions getAccount(Long id) throws Exception
     {
-        return mockMvc.perform(get("/accounts/" + id))
-                .andExpect(status().isOk());
+        return mockMvc.perform(get("/accounts/" + id));
+    }
+
+    public ResultActions getAccountForUser(Long userId) throws Exception
+    {
+        return mockMvc.perform(get("/accounts")
+                .param("userId", userId.toString()));
     }
 }

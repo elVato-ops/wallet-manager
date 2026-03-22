@@ -17,7 +17,32 @@ public class UserIntegrationTest extends BaseIntegrationTest
     class UserCreation
     {
         @Test
-        public void returnsUser_whenCreateAndFetchUser() throws Exception
+        public void returnsUser_whenSuccess() throws Exception
+        {
+            //GIVEN
+            postCreateUser(USER_NAME)
+
+                    //THEN
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.name").value(USER_NAME));
+        }
+
+        @Test
+        public void returns400_whenNameEmpty() throws Exception
+        {
+            //WHEN
+            postCreateUser("")
+
+                    //THEN
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    class FetchUser
+    {
+        @Test
+        public void returnsUser_whenExists() throws Exception
         {
             //GIVEN
             Long userId = createUser(USER_NAME);
@@ -34,7 +59,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returnsPaginatedUsers_whenCreateAndFetchUsers() throws Exception
+        public void returnsPaginatedUsers_whenFetchUsers() throws Exception
         {
             //GIVEN
             Long firstUserId = createUser(USER_NAME);
@@ -88,17 +113,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returns400_whenCreateUser_withEmptyName() throws Exception
-        {
-            //WHEN
-            postCreateUser("")
-
-            //THEN
-                    .andExpect(status().isBadRequest());
-        }
-
-        @Test
-        public void returns404_whenFetchNonExistUser() throws Exception
+        public void returns404_whenNotExists() throws Exception
         {
             //WHEN
             mockMvc.perform(get("/users/" + NON_EXISTING_ID)
@@ -113,7 +128,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returns400_whenFetchUser_wrongIdFormat() throws Exception
+        public void returns400_whenWrongIdFormat() throws Exception
         {
             //WHEN
             mockMvc.perform(get("/users/bob")
@@ -129,7 +144,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
     class AccountCreation
     {
         @Test
-        public void returnsAccount_whenCreateAccountForExistingUser() throws Exception
+        public void returnsAccount_whenSucess() throws Exception
         {
             //GIVEN
             Long userId = createUser(USER_NAME);
@@ -145,7 +160,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returns400_whenCreateAccount_requestInvalid() throws Exception
+        public void returns400_whenRequestInvalid() throws Exception
         {
             //GIVEN
             Long userId = createUser(USER_NAME);
@@ -158,7 +173,7 @@ public class UserIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returns404_whenCreateAccount_userNotExists() throws Exception
+        public void returns404_whenUserNotExists() throws Exception
         {
             //WHEN
             postCreateAccount(NON_EXISTING_ID, createAccountRequest())

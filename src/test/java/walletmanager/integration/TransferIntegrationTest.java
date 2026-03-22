@@ -2,15 +2,10 @@ package walletmanager.integration;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.web.servlet.MvcResult;
-import walletmanager.response.AccountResponse;
+import walletmanager.request.CreateAccountRequest;
 
 import java.math.BigDecimal;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static walletmanager.utils.TestConstants.*;
@@ -18,10 +13,10 @@ import static walletmanager.utils.TestConstants.*;
 public class TransferIntegrationTest extends BaseIntegrationTest
 {
     @Nested
-    class SuccessCases
+    class Transfer
     {
         @Test
-        public void createsTransactions_whenTransferBetweenAccounts() throws Exception
+        public void returnsTransaction_whenSuccess() throws Exception
         {
             //GIVEN
             Long userId = createUser(USER_NAME);
@@ -29,63 +24,105 @@ public class TransferIntegrationTest extends BaseIntegrationTest
             Long firstAccountId = createAccount(userId, createAccountRequest());
             Long secondAccountId = createAccount(userId, createOtherAccountRequest());
 
-            transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
-            transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
-
             //WHEN
-            mockMvc.perform(get("/accounts/" + firstAccountId + "/transactions"))
-
-                    //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.content[*].fromAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
-                    .andExpect(jsonPath("$.content[*].toAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
-                    .andExpect(jsonPath("$.content[*].currency", containsInAnyOrder(PLN.toString(), PLN.toString())))
-                    .andExpect(jsonPath("$.content[*].amount", containsInAnyOrder(20,  50)));
-
-            //AND WHEN
-            mockMvc.perform(get("/accounts/" + secondAccountId + "/transactions"))
-
-                    //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.content[*].fromAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
-                    .andExpect(jsonPath("$.content[*].toAccountId", containsInAnyOrder(toInt(firstAccountId), toInt(secondAccountId))))
-                    .andExpect(jsonPath("$.content[*].currency", containsInAnyOrder(PLN.toString(), PLN.toString())))
-                    .andExpect(jsonPath("$.content[*].amount", containsInAnyOrder(20,  50)));
-        }
-
-        @Test
-        public void updatesBalances_whenTransferBetweenAccounts() throws Exception
-        {
-            //GIVEN
-            Long userId = createUser(USER_NAME);
-
-            Long firstAccountId = createAccount(userId, createAccountRequest());
-            Long secondAccountId = createAccount(userId, createOtherAccountRequest());
-
-            transfer(firstAccountId, secondAccountId, BigDecimal.valueOf(20));
-            transfer(secondAccountId, firstAccountId, BigDecimal.valueOf(50));
-
-            //WHEN
-            MvcResult firstAccountResult = getAccount(firstAccountId)
-                    .andReturn();
-
-            MvcResult secondAccountResult = getAccount(secondAccountId)
-                    .andReturn();
+            transfer(firstAccountId, secondAccountId, TRANSFER_AMOUNT)
 
             //THEN
-            AccountResponse firstAccount = objectMapper.readValue(firstAccountResult.getResponse().getContentAsString(), AccountResponse.class);
-            AccountResponse secondAccount = objectMapper.readValue(secondAccountResult.getResponse().getContentAsString(), AccountResponse.class);
-
-            assertEquals(BigDecimal.valueOf(130), firstAccount.balance());
-            assertEquals(BigDecimal.valueOf(170), secondAccount.balance());
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.fromAccountId").value(toInt(firstAccountId)))
+                    .andExpect(jsonPath("$.toAccountId").value(toInt(secondAccountId)))
+                    .andExpect(jsonPath("$.currency").value(PLN.toString()))
+                    .andExpect(jsonPath("$.amount").value(toInt(TRANSFER_AMOUNT)));
         }
-    }
 
-    @Nested
-    class FailureCases
-    {
+        @Test
+        public void returns400_whenAmountNegative() throws Exception
+        {
+            //GIVEN
+            Long userId = createUser(USER_NAME);
 
+            Long firstAccountId = createAccount(userId, createAccountRequest());
+            Long secondAccountId = createAccount(userId, createOtherAccountRequest());
+
+            //WHEN
+            transfer(firstAccountId, secondAccountId, TRANSFER_AMOUNT.negate())
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        public void returns404_whenAccountNotExists() throws Exception
+        {
+            //GIVEN
+            Long userId = createUser(USER_NAME);
+
+            Long firstAccountId = createAccount(userId, createAccountRequest());
+
+            //WHEN
+            transfer(firstAccountId, NON_EXISTING_ID, TRANSFER_AMOUNT)
+
+            //THEN
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value("Account " + NON_EXISTING_ID + " not found"))
+                    .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        public void returns409_whenTransferToSameAccount() throws Exception
+        {
+            //GIVEN
+            Long userId = createUser(USER_NAME);
+
+            Long firstAccountId = createAccount(userId, createAccountRequest());
+
+            //WHEN
+            transfer(firstAccountId, firstAccountId, TRANSFER_AMOUNT)
+
+            //THEN
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value("Cannot transfer to the same account"))
+                    .andExpect(jsonPath("$.errorCode").value("ILLEGAL_TRANSACTION"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        public void returns409_whenDifferentCurrencies() throws Exception
+        {
+            //GIVEN
+            Long userId = createUser(USER_NAME);
+
+            Long firstAccountId = createAccount(userId, createAccountRequest());
+            Long secondAccountId = createAccount(userId, new CreateAccountRequest(EUR, OTHER_BALANCE));
+
+            //WHEN
+            transfer(firstAccountId, secondAccountId, TRANSFER_AMOUNT)
+
+                    //THEN
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value("Cannot transfer " + PLN + " to " + EUR))
+                    .andExpect(jsonPath("$.errorCode").value("CURRENCY_MISMATCH"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        public void returns409_whenInsufficientFunds() throws Exception
+        {
+            //GIVEN
+            Long userId = createUser(USER_NAME);
+
+            Long firstAccountId = createAccount(userId, createAccountRequest());
+            Long secondAccountId = createAccount(userId, createOtherAccountRequest());
+
+            //WHEN
+            transfer(firstAccountId, secondAccountId, new BigDecimal(1000))
+
+            //THEN
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value("You have insufficient funds to perform this operation"))
+                    .andExpect(jsonPath("$.errorCode").value("INSUFFICIENT_FUNDS"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
     }
 }
