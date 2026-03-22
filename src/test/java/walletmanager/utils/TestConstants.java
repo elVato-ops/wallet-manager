@@ -38,6 +38,8 @@ public class TestConstants
     public static final BigDecimal TRANSFER_AMOUNT = new BigDecimal(50);
     public static final BigDecimal OTHER_TRANSFER_AMOUNT = new BigDecimal(150);
 
+    public static final Long NON_EXISTING_ID = 997L;
+
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
     public static AccountEntity account()
