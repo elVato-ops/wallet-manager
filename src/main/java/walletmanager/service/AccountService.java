@@ -48,6 +48,11 @@ public class AccountService
 
     public Page<TransactionResponse> getTransactionsForAccount(Long id, Pageable pageable)
     {
+        if (!accountRepository.existsById(id))
+        {
+            throw new AccountNotFoundException(id);
+        }
+
         return transactionRepository.findTransactionsForAccount(id, pageable)
                 .map(TransactionMapper::toResponse);
     }

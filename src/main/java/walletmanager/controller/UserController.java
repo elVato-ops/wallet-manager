@@ -79,7 +79,9 @@ public class UserController
     })
     @PageableAsQueryParam
     @GetMapping
-    public Page<UserResponse> getAllUsers(Pageable pageable)
+    public Page<UserResponse> getAllUsers(
+            @Parameter(description = "Pagination parameters: page, size, sort")
+            Pageable pageable)
     {
         return userService.getAllUsers(pageable);
     }

@@ -167,7 +167,6 @@ public class AccountControllerTest
             //THEN
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size").value(2))
-                    .andExpect(jsonPath("$.number").value(0))
                     .andExpect(jsonPath("$.totalElements").value(5))
                     .andExpect(jsonPath("$.totalPages").value(3))
 
@@ -183,6 +182,30 @@ public class AccountControllerTest
                             containsInAnyOrder(PLN.toString(), EUR.toString())))
                     .andExpect(jsonPath("$.content[*].amount",
                             containsInAnyOrder(toInt(TRANSFER_AMOUNT), toInt(OTHER_TRANSFER_AMOUNT))));
+
+            verify(service, times(1)).getTransactionsForAccount(eq(17L), any(Pageable.class));
+            verifyNoMoreInteractions(service);
+        }
+
+        @Test
+        public void returns404_whenAccountNotExists() throws Exception
+        {
+            //GIVEN
+            Page<TransactionResponse> response =
+                    new PageImpl<>(
+                            List.of(transactionResponse(), otherTransactionResponse()),
+                            PageRequest.of(0, 2),
+                            5);
+
+            when(service.getTransactionsForAccount(eq(17L), any(Pageable.class))).thenThrow(new AccountNotFoundException(17L));
+
+            //WHEN
+            mockMvc.perform(get("/accounts/17/transactions")
+                            .param("page", "0")
+                            .param("size", "2"))
+
+                    //THEN
+                    .andExpect(status().isNotFound());
 
             verify(service, times(1)).getTransactionsForAccount(eq(17L), any(Pageable.class));
             verifyNoMoreInteractions(service);

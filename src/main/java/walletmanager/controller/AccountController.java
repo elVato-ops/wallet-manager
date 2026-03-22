@@ -14,8 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-import walletmanager.response.AccountResponse;
-import walletmanager.response.TransactionResponse;
+import walletmanager.response.*;
 import walletmanager.service.AccountService;
 
 @RestController
@@ -30,7 +29,7 @@ public class AccountController
                 description = "Returns a list of accounts owned by the specified user. Fails if the user does not exist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of accounts",
-                    content = @Content(schema = @Schema(implementation = AccountResponse.class))),
+                    content = @Content(schema = @Schema(implementation = PageResponse.class))),
             @ApiResponse(responseCode = "400", description = "User id format invalid",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
@@ -38,12 +37,15 @@ public class AccountController
     })
     @PageableAsQueryParam
     @GetMapping
-    public Page<AccountResponse> getAccountsForUser(
+    public PageResponse<AccountResponse> getAccountsForUser(
             @Parameter(description = "Id of the account's owner")
             @RequestParam Long userId,
+
+            @Parameter(description = "Pagination parameters: page, size, sort")
             Pageable pageable)
     {
-        return service.getAccountsForUser(userId, pageable);
+        Page<AccountResponse> page = service.getAccountsForUser(userId, pageable);
+        return new PageResponse<>(page);
     }
 
     @Operation(summary = "Return account with a given id",
@@ -72,16 +74,20 @@ public class AccountController
                 description = "Returns a list of transactions for a given account. Fails if account does not exist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of transactions",
-                    content = @Content(schema = @Schema(implementation = TransactionResponse.class))),
+                    content = @Content(schema = @Schema(implementation = PageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Account not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PageableAsQueryParam
     @GetMapping("/{id}/transactions")
-    public Page<TransactionResponse> getTransactions(
+    public PageResponse<TransactionResponse> getTransactions(
             @Parameter(description = "Id of the account")
             @PathVariable Long id,
 
+            @Parameter(description = "Pagination parameters: page, size, sort")
             Pageable pageable)
     {
-        return service.getTransactionsForAccount(id, pageable);
+        Page<TransactionResponse> page = service.getTransactionsForAccount(id, pageable);
+        return new PageResponse<>(page);
     }
 }
