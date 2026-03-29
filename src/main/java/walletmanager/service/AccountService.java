@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import walletmanager.entity.AccountEntity;
+import walletmanager.entity.Account;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
@@ -40,7 +40,7 @@ public class AccountService
 
     public AccountResponse getAccount(Long id)
     {
-        AccountEntity account = accountRepository.findById(id)
+        Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException(id));
 
         return toResponse(account);

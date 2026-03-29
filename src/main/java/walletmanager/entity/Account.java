@@ -17,7 +17,7 @@ import static java.math.BigDecimal.ZERO;
 @Table(name = "accounts")
 @Getter
 @NoArgsConstructor
-public class AccountEntity
+public class Account
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,13 +31,13 @@ public class AccountEntity
     private BigDecimal balance;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Version
     Long version;
 
-    public AccountEntity(Currency currency, BigDecimal balance, UserEntity user)
+    public Account(Currency currency, BigDecimal balance, User user)
     {
         if (currency == null)
         {

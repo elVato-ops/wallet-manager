@@ -4,9 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import walletmanager.entity.AccountEntity;
-import walletmanager.entity.TransactionEntity;
-import walletmanager.entity.UserEntity;
+import walletmanager.entity.Account;
+import walletmanager.entity.Transaction;
+import walletmanager.entity.User;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.AccountResponse;
@@ -42,14 +42,14 @@ public class TestConstants
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
-    public static AccountEntity account()
+    public static Account account()
     {
-        return new AccountEntity(PLN, BALANCE, user());
+        return new Account(PLN, BALANCE, user());
     }
 
-    public static AccountEntity otherAccount()
+    public static Account otherAccount()
     {
-        return new AccountEntity(PLN, BALANCE, otherUser());
+        return new Account(PLN, BALANCE, otherUser());
     }
 
     public static AccountResponse accountResponse()
@@ -57,17 +57,17 @@ public class TestConstants
         return new AccountResponse(ACCOUNT_ID, PLN, BALANCE, USER_ID);
     }
 
-    public static UserEntity user()
+    public static User user()
     {
-        return new UserEntity(USER_NAME);
+        return new User(USER_NAME);
     }
 
-    public static UserEntity otherUser()
+    public static User otherUser()
     {
-        return new UserEntity(SECOND_USER_NAME);
+        return new User(SECOND_USER_NAME);
     }
 
-    public static Page<AccountEntity> accountPageEntity()
+    public static Page<Account> accountPageEntity()
     {
         return new PageImpl<>(List.of(account()));
     }
@@ -77,9 +77,9 @@ public class TestConstants
         return new PageImpl<>(List.of(accountResponse()));
     }
 
-    public static TransactionEntity transactionEntity()
+    public static Transaction transactionEntity()
     {
-        return new TransactionEntity(TRANSFER_AMOUNT, PLN, account(), otherAccount());
+        return new Transaction(TRANSFER_AMOUNT, PLN, account(), otherAccount());
     }
 
     public static TransactionResponse transactionResponse()

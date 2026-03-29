@@ -9,7 +9,7 @@ import walletmanager.exception.UserValidationException;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
-public class UserEntity
+public class User
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class UserEntity
     @Column(nullable = false)
     private String name;
 
-    public UserEntity(String name)
+    public User(String name)
     {
         if (name == null || name.isBlank())
         {

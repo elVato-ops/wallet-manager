@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import walletmanager.entity.AccountEntity;
+import walletmanager.entity.Account;
 import walletmanager.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
-import walletmanager.entity.UserEntity;
+import walletmanager.entity.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +51,7 @@ public class UserServiceTest
             when(userRepository.save(any())).thenReturn(user());
 
             CreateUserRequest request = new CreateUserRequest(USER_NAME);
-            ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
             //WHEN
             UserResponse user = service.createUser(request);
@@ -72,7 +72,7 @@ public class UserServiceTest
         public void returnsUser_whenUserExists()
         {
             //GIVEN
-            Optional<UserEntity> optionalUser = Optional.of(user());
+            Optional<User> optionalUser = Optional.of(user());
             when(userRepository.findById(USER_ID)).thenReturn(optionalUser);
 
             //WHEN
@@ -106,7 +106,7 @@ public class UserServiceTest
         public void returnsUsers()
         {
             //GIVEN
-            Page<UserEntity> userEntities = new PageImpl<>(List.of(user(), otherUser()));
+            Page<User> userEntities = new PageImpl<>(List.of(user(), otherUser()));
             when(userRepository.findAll(PAGEABLE)).thenReturn(userEntities);
 
             //WHEN
@@ -133,7 +133,7 @@ public class UserServiceTest
             when(accountRepository.save(any())).thenReturn(account());
 
             CreateAccountRequest request = new CreateAccountRequest(PLN, BALANCE);
-            ArgumentCaptor<AccountEntity> captor = ArgumentCaptor.forClass(AccountEntity.class);
+            ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
 
             //WHEN
             AccountResponse account = service.createAccount(request, USER_ID);

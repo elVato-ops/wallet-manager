@@ -1,7 +1,7 @@
 package walletmanager.utils;
 
-import walletmanager.entity.AccountEntity;
-import walletmanager.entity.UserEntity;
+import walletmanager.entity.Account;
+import walletmanager.entity.User;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.response.AccountResponse;
 
@@ -10,17 +10,17 @@ import java.util.stream.Collectors;
 
 public class AccountMapper
 {
-    public static AccountEntity toEntity(CreateAccountRequest request, UserEntity user)
+    public static Account toEntity(CreateAccountRequest request, User user)
     {
-        return new AccountEntity(request.currency(), request.balance(), user);
+        return new Account(request.currency(), request.balance(), user);
     }
 
-    public static AccountResponse toResponse(AccountEntity entity)
+    public static AccountResponse toResponse(Account entity)
     {
         return new AccountResponse(entity.getId(), entity.getCurrency(), entity.getBalance(), entity.getUser().getId());
     }
 
-    public static List<AccountResponse> toResponse(List<AccountEntity> accounts)
+    public static List<AccountResponse> toResponse(List<Account> accounts)
     {
         return accounts.stream()
                 .map(AccountMapper::toResponse)

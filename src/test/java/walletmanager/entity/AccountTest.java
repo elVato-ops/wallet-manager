@@ -12,14 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static walletmanager.utils.TestConstants.*;
 
-public class AccountEntityTest
+public class AccountTest
 {
     @Test
     public void returnsException_whenParameterInvalid()
     {
-        assertThrows(AccountValidationException.class, () -> new AccountEntity(null, BigDecimal.TEN, user()));
-        assertThrows(AccountValidationException.class, () -> new AccountEntity(PLN, BigDecimal.valueOf(-10L), user()));
-        assertThrows(AccountValidationException.class, () -> new AccountEntity(PLN, BigDecimal.TEN, null));
+        assertThrows(AccountValidationException.class, () -> new Account(null, BigDecimal.TEN, user()));
+        assertThrows(AccountValidationException.class, () -> new Account(PLN, BigDecimal.valueOf(-10L), user()));
+        assertThrows(AccountValidationException.class, () -> new Account(PLN, BigDecimal.TEN, null));
     }
 
     @Nested
@@ -29,7 +29,7 @@ public class AccountEntityTest
         public void updatesBalance_whenWithdrawLessThanBalance()
         {
             //GIVEN
-            AccountEntity account = account();
+            Account account = account();
 
             //WHEN
             account.withdraw(BigDecimal.valueOf(50L));
@@ -60,7 +60,7 @@ public class AccountEntityTest
         public void updatesBalance_whenDepositPositiveAmount()
         {
             //GIVEN
-            AccountEntity account = account();
+            Account account = account();
 
             //WHEN
             account.deposit(BigDecimal.valueOf(50L));

@@ -1,11 +1,11 @@
 package walletmanager.utils;
 
-import walletmanager.entity.TransactionEntity;
+import walletmanager.entity.Transaction;
 import walletmanager.response.TransactionResponse;
 
 public class TransactionMapper
 {
-    public static TransactionResponse toResponse(TransactionEntity entity)
+    public static TransactionResponse toResponse(Transaction entity)
     {
         return new TransactionResponse(
                 entity.getId(),

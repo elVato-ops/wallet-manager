@@ -14,7 +14,7 @@ import java.util.Currency;
 @Table(name = "transactions")
 @NoArgsConstructor
 @Getter
-public class TransactionEntity
+public class Transaction
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,13 +32,13 @@ public class TransactionEntity
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private AccountEntity fromAccount;
+    private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private AccountEntity toAccount;
+    private Account toAccount;
 
-    public TransactionEntity(BigDecimal amount, Currency currency, AccountEntity fromAccount, AccountEntity toAccount)
+    public Transaction(BigDecimal amount, Currency currency, Account fromAccount, Account toAccount)
     {
         if (currency == null)
         {
@@ -62,11 +62,11 @@ public class TransactionEntity
         this.toAccount = toAccount;
     }
 
-    public static TransactionEntity transfer(AccountEntity fromAccount, AccountEntity toAccount, BigDecimal amount)
+    public static Transaction transfer(Account fromAccount, Account toAccount, BigDecimal amount)
     {
         fromAccount.withdraw(amount);
         toAccount.deposit(amount);
 
-        return new TransactionEntity (amount, fromAccount.getCurrency(), fromAccount, toAccount);
+        return new Transaction(amount, fromAccount.getCurrency(), fromAccount, toAccount);
     }
 }

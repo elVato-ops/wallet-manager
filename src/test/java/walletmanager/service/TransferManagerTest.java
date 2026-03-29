@@ -5,8 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import walletmanager.entity.AccountEntity;
-import walletmanager.entity.TransactionEntity;
+import walletmanager.entity.Account;
+import walletmanager.entity.Transaction;
 import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
@@ -39,19 +39,19 @@ public class TransferManagerTest
     public void returnsEntity_whenInputValid()
     {
         //GIVEN
-        AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
+        Account fromAccount = new Account(PLN, BigDecimal.valueOf(120), user());
         when(accountRepository.findById(FROM_ACCOUNT_ID)).thenReturn(Optional.of(fromAccount));
 
-        AccountEntity toAccount = new AccountEntity(PLN, BigDecimal.valueOf(30), user());
+        Account toAccount = new Account(PLN, BigDecimal.valueOf(30), user());
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
         //WHEN
-        TransactionEntity entity = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
+        Transaction entity = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
 
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
         verifyNoMoreInteractions(accountRepository);
-        verify(transactionRepository, times(1)).save(any(TransactionEntity.class));
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
         verifyNoMoreInteractions(transactionRepository);
 
         assertEquals(BigDecimal.valueOf(70), fromAccount.getBalance());
@@ -90,10 +90,10 @@ public class TransferManagerTest
     public void throwsIllegalTransaction_whenNegativeAmount()
     {
         //GIVEN
-        AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
+        Account fromAccount = new Account(PLN, BigDecimal.valueOf(120), user());
         when(accountRepository.findById(FROM_ACCOUNT_ID)).thenReturn(Optional.of(fromAccount));
 
-        AccountEntity toAccount = new AccountEntity(PLN, BigDecimal.valueOf(30), user());
+        Account toAccount = new Account(PLN, BigDecimal.valueOf(30), user());
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
         //WHEN
@@ -112,10 +112,10 @@ public class TransferManagerTest
     public void throwsInsufficientFunds_whenBalanceLowerThanAmount()
     {
         //GIVEN
-        AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
+        Account fromAccount = new Account(PLN, BigDecimal.valueOf(120), user());
         when(accountRepository.findById(FROM_ACCOUNT_ID)).thenReturn(Optional.of(fromAccount));
 
-        AccountEntity toAccount = new AccountEntity(PLN, BigDecimal.valueOf(30), user());
+        Account toAccount = new Account(PLN, BigDecimal.valueOf(30), user());
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
         //WHEN
@@ -133,10 +133,10 @@ public class TransferManagerTest
     @Test
     public void throwDifferentCurrency_ifDifferentCurrencies()
     {
-        AccountEntity fromAccount = new AccountEntity(PLN, BigDecimal.valueOf(120), user());
+        Account fromAccount = new Account(PLN, BigDecimal.valueOf(120), user());
         when(accountRepository.findById(FROM_ACCOUNT_ID)).thenReturn(Optional.of(fromAccount));
 
-        AccountEntity toAccount = new AccountEntity(EUR, BigDecimal.valueOf(30), user());
+        Account toAccount = new Account(EUR, BigDecimal.valueOf(30), user());
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
         //WHEN
