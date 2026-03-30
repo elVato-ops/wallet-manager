@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import walletmanager.entity.Account;
+import walletmanager.entity.Transaction;
 import walletmanager.entity.User;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
@@ -46,6 +47,11 @@ public class TestConstants
         return new Account(PLN, BALANCE, user());
     }
 
+    public static Account otherAccount()
+    {
+        return new Account(PLN, BALANCE, otherUser());
+    }
+
     public static AccountResponse accountResponse()
     {
         return new AccountResponse(ACCOUNT_ID, PLN, BALANCE, USER_ID);
@@ -71,9 +77,19 @@ public class TestConstants
         return new PageImpl<>(List.of(accountResponse()));
     }
 
+    public static Page<Transaction> transactionPageResponse()
+    {
+        return new PageImpl<>(List.of(transaction()));
+    }
+
     public static TransactionResponse transactionResponse()
     {
         return new TransactionResponse(TRANSACTION_ID, FROM_ACCOUNT_ID, TO_ACCOUNT_ID, PLN, TRANSFER_AMOUNT);
+    }
+
+    public static Transaction transaction()
+    {
+        return new Transaction(TRANSFER_AMOUNT, PLN, account(), otherAccount());
     }
 
     public static TransactionResponse otherTransactionResponse()
