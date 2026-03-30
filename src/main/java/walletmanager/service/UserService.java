@@ -54,6 +54,7 @@ public class UserService
         return accountService.createAccount(request, user);
     }
 
+    @Transactional(readOnly = true)
     public Page<AccountResponse> getAccountsForUser(Long id, Pageable pageable)
     {
         if (!userRepository.existsById(id))

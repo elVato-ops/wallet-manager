@@ -48,7 +48,7 @@ public class TransferManager
         return transfer(fromAccount, toAccount, amount);
     }
 
-    public Transaction transfer(Account fromAccount, Account toAccount, BigDecimal amount)
+    private Transaction transfer(Account fromAccount, Account toAccount, BigDecimal amount)
     {
         fromAccount.withdraw(amount);
         toAccount.deposit(amount);
