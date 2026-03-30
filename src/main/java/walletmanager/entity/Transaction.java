@@ -61,12 +61,4 @@ public class Transaction
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
     }
-
-    public static Transaction transfer(Account fromAccount, Account toAccount, BigDecimal amount)
-    {
-        fromAccount.withdraw(amount);
-        toAccount.deposit(amount);
-
-        return new Transaction(amount, fromAccount.getCurrency(), fromAccount, toAccount);
-    }
 }

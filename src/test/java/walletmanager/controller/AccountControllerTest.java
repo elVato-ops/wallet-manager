@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import walletmanager.exception.AccountNotFoundException;
-import walletmanager.exception.UserNotFoundException;
 import walletmanager.response.TransactionResponse;
 import walletmanager.service.AccountService;
 
@@ -32,63 +31,6 @@ public class AccountControllerTest
 
     @MockBean
     private AccountService service;
-
-    @Nested
-    class GetAccountForUser
-    {
-        @Test
-        public void returns200_whenRequestValid() throws Exception
-        {
-            //GIVEN
-            when(service.getAccountsForUser(eq(USER_ID), any(Pageable.class))).thenReturn(accountPageResponse());
-
-            //WHEN
-            mockMvc.perform(get("/accounts")
-                            .param("userId", "17"))
-
-            //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[*].id").value(toInt(ACCOUNT_ID)))
-                    .andExpect(jsonPath("$.content[*].currency").value(PLN.toString()))
-                    .andExpect(jsonPath("$.content[*].balance").value(toInt(BALANCE)))
-                    .andExpect(jsonPath("$.content[*].userId").value(toInt(USER_ID)));
-
-            verify(service, times(1)).getAccountsForUser(eq(USER_ID), any(Pageable.class));
-            verifyNoMoreInteractions(service);
-        }
-
-        @Test
-        public void returns404_whenUserNotExists() throws Exception
-        {
-            //GIVEN
-            when(service.getAccountsForUser(eq(USER_ID), any(Pageable.class))).thenThrow(new UserNotFoundException(USER_ID));
-
-            //WHEN
-            mockMvc.perform(get("/accounts")
-                            .param("userId", "17"))
-
-            //THEN
-                    .andExpect(status().isNotFound());
-
-            verify(service, times(1)).getAccountsForUser(eq(USER_ID), any(Pageable.class));
-            verifyNoMoreInteractions(service);
-        }
-
-        @Test
-        public void returns400_whenPathInvalid() throws Exception
-        {
-            //GIVEN
-
-            //WHEN
-            mockMvc.perform(get("/accounts")
-                            .param("userId", "abc"))
-
-            //THEN
-                    .andExpect(status().isBadRequest());
-
-            verify(service, never()).getAccountsForUser(anyLong(), eq(PAGEABLE));
-        }
-    }
 
     @Nested
     class GetAccount

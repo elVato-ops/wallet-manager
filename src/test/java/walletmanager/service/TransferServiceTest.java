@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import walletmanager.exception.ConcurrentTransferException;
 import walletmanager.response.TransactionResponse;
+import walletmanager.utils.TransactionMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,12 +25,15 @@ public class TransferServiceTest
     @Mock
     private TransferManager transferManager;
 
+    @Spy
+    private TransactionMapper transactionMapper = new TransactionMapper();
+
     @Test
     public void returnResponse_whenRequestValid()
     {
         //GIVEN
         when(transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT))
-                .thenReturn(transactionEntity());
+                .thenReturn(transactionResponse());
 
         //WHEN
         TransactionResponse response = service.transfer(transferRequest());
@@ -48,7 +53,7 @@ public class TransferServiceTest
         when(transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT))
                 .thenThrow(OptimisticLockException.class)
                 .thenThrow(OptimisticLockException.class)
-                .thenReturn(transactionEntity());
+                .thenReturn(transactionResponse());
 
         //WHEN
         TransactionResponse response = service.transfer(transferRequest());

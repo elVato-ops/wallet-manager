@@ -9,7 +9,7 @@ import walletmanager.exception.AccountNotFoundException;
 import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.repository.AccountRepository;
-import walletmanager.repository.TransactionRepository;
+import walletmanager.response.TransactionResponse;
 
 import java.math.BigDecimal;
 
@@ -17,11 +17,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class TransferManager
 {
+    private final TransactionService transactionService;
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
 
     @Transactional
-    public Transaction transfer(Long fromAccountId, Long toAccountId, BigDecimal amount)
+    public TransactionResponse transfer(Long fromAccountId, Long toAccountId, BigDecimal amount)
     {
         if (fromAccountId.equals(toAccountId))
         {
@@ -29,9 +29,7 @@ public class TransferManager
         }
 
         Transaction transaction = performTransaction(fromAccountId, toAccountId, amount);
-        transactionRepository.save(transaction);
-
-        return transaction;
+        return transactionService.createTransaction(transaction);
     }
 
     private Transaction performTransaction(Long fromAccountId, Long toAccountId, BigDecimal amount)
@@ -47,6 +45,14 @@ public class TransferManager
             throw new DifferentCurrencyException(fromAccount.getCurrency(), toAccount.getCurrency());
         }
 
-        return Transaction.transfer(fromAccount, toAccount, amount);
+        return transfer(fromAccount, toAccount, amount);
+    }
+
+    public Transaction transfer(Account fromAccount, Account toAccount, BigDecimal amount)
+    {
+        fromAccount.withdraw(amount);
+        toAccount.deposit(amount);
+
+        return new Transaction(amount, fromAccount.getCurrency(), fromAccount, toAccount);
     }
 }

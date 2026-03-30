@@ -12,7 +12,7 @@ import walletmanager.exception.DifferentCurrencyException;
 import walletmanager.exception.IllegalTransactionException;
 import walletmanager.exception.InsufficientFundsException;
 import walletmanager.repository.AccountRepository;
-import walletmanager.repository.TransactionRepository;
+import walletmanager.response.TransactionResponse;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -33,10 +33,10 @@ public class TransferManagerTest
     private AccountRepository accountRepository;
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Test
-    public void returnsEntity_whenInputValid()
+    public void returnsResponse_whenInputValid()
     {
         //GIVEN
         Account fromAccount = new Account(PLN, BigDecimal.valueOf(120), user());
@@ -45,19 +45,21 @@ public class TransferManagerTest
         Account toAccount = new Account(PLN, BigDecimal.valueOf(30), user());
         when(accountRepository.findById(TO_ACCOUNT_ID)).thenReturn(Optional.of(toAccount));
 
+        when(transactionService.createTransaction(any(Transaction.class))).thenReturn(transactionResponse());
+
         //WHEN
-        Transaction entity = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
+        TransactionResponse response = transferManager.transfer(FROM_ACCOUNT_ID, TO_ACCOUNT_ID, TRANSFER_AMOUNT);
 
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
         verifyNoMoreInteractions(accountRepository);
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verifyNoMoreInteractions(transactionRepository);
+        verify(transactionService, times(1)).createTransaction(any(Transaction.class));
+        verifyNoMoreInteractions(transactionService);
 
         assertEquals(BigDecimal.valueOf(70), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(80), toAccount.getBalance());
-        assertEquals(TRANSFER_AMOUNT, entity.getAmount());
-        assertEquals(PLN, entity.getCurrency());
+        assertEquals(TRANSFER_AMOUNT, response.amount());
+        assertEquals(PLN, response.currency());
     }
 
     @Test
@@ -67,8 +69,7 @@ public class TransferManagerTest
         assertThrows(IllegalTransactionException.class, () -> transferManager.transfer(FROM_ACCOUNT_ID, FROM_ACCOUNT_ID, TRANSFER_AMOUNT));
 
         //THEN
-        verifyNoInteractions(accountRepository);
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(transactionService);
     }
 
     @Test
@@ -83,7 +84,7 @@ public class TransferManagerTest
         //THEN
         verify(accountRepository, times(1)).findById(FROM_ACCOUNT_ID);
         verifyNoMoreInteractions(accountRepository);
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(transactionService);
     }
 
     @Test
@@ -102,7 +103,7 @@ public class TransferManagerTest
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
         verifyNoMoreInteractions(accountRepository);
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(transactionService);
 
         assertEquals(BigDecimal.valueOf(120), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(30), toAccount.getBalance());
@@ -124,7 +125,7 @@ public class TransferManagerTest
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
         verifyNoMoreInteractions(accountRepository);
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(transactionService);
 
         assertEquals(BigDecimal.valueOf(120), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(30), toAccount.getBalance());
@@ -145,7 +146,7 @@ public class TransferManagerTest
         //THEN
         verify(accountRepository, times(2)).findById(anyLong());
         verifyNoMoreInteractions(accountRepository);
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(transactionService);
 
         assertEquals(BigDecimal.valueOf(120), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(30), toAccount.getBalance());

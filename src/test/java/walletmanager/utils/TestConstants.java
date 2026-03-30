@@ -5,7 +5,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import walletmanager.entity.Account;
-import walletmanager.entity.Transaction;
 import walletmanager.entity.User;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.TransferRequest;
@@ -38,18 +37,13 @@ public class TestConstants
     public static final BigDecimal TRANSFER_AMOUNT = new BigDecimal(50);
     public static final BigDecimal OTHER_TRANSFER_AMOUNT = new BigDecimal(150);
 
-    public static final Long NON_EXISTING_ID = 997L;
+    public static final Long NON_EXISTING_ID = 999L;
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
     public static Account account()
     {
         return new Account(PLN, BALANCE, user());
-    }
-
-    public static Account otherAccount()
-    {
-        return new Account(PLN, BALANCE, otherUser());
     }
 
     public static AccountResponse accountResponse()
@@ -75,11 +69,6 @@ public class TestConstants
     public static Page<AccountResponse> accountPageResponse()
     {
         return new PageImpl<>(List.of(accountResponse()));
-    }
-
-    public static Transaction transactionEntity()
-    {
-        return new Transaction(TRANSFER_AMOUNT, PLN, account(), otherAccount());
     }
 
     public static TransactionResponse transactionResponse()

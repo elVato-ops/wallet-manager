@@ -85,7 +85,6 @@ public abstract class BaseIntegrationTest
 
     public ResultActions getAccountForUser(Long userId) throws Exception
     {
-        return mockMvc.perform(get("/accounts")
-                .param("userId", userId.toString()));
+        return mockMvc.perform(get("/users/" + userId + "/accounts"));
     }
 }

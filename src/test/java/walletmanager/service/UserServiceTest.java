@@ -1,27 +1,26 @@
 package walletmanager.service;
 
 import org.junit.jupiter.api.Nested;
-import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import walletmanager.entity.Account;
-import walletmanager.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import walletmanager.repository.AccountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import walletmanager.entity.User;
+import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
-import walletmanager.entity.User;
+import walletmanager.utils.UserMapper;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,7 +38,10 @@ public class UserServiceTest
     private UserRepository userRepository;
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountService accountService;
+
+    @Spy
+    private UserMapper userMapper = new UserMapper();
 
     @Nested
     class CreateUser
@@ -119,7 +121,7 @@ public class UserServiceTest
             assertEquals(List.of(USER_NAME, SECOND_USER_NAME),
                     allUsers.stream()
                             .map(UserResponse::name)
-                            .collect(Collectors.toList()));
+                            .toList());
         }
     }
     @Nested
@@ -130,10 +132,10 @@ public class UserServiceTest
         {
             //GIVEN
             when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user()));
-            when(accountRepository.save(any())).thenReturn(account());
+            when(accountService.createAccount(any(CreateAccountRequest.class), any(User.class))).thenReturn(accountResponse());
 
             CreateAccountRequest request = new CreateAccountRequest(PLN, BALANCE);
-            ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
             //WHEN
             AccountResponse account = service.createAccount(request, USER_ID);
@@ -142,8 +144,8 @@ public class UserServiceTest
             verify(userRepository, times(1)).findById(USER_ID);
             verifyNoMoreInteractions(userRepository);
 
-            verify(accountRepository).save(captor.capture());
-            verifyNoMoreInteractions(accountRepository);
+            verify(accountService).createAccount(eq(request), captor.capture());
+            verifyNoMoreInteractions(accountService);
 
             assertEquals(PLN, account.currency());
             assertEquals(BALANCE, account.balance());
@@ -163,7 +165,48 @@ public class UserServiceTest
             //THEN
             verify(userRepository, times(1)).findById(USER_ID);
             verifyNoMoreInteractions(userRepository);
-            verifyNoInteractions(accountRepository);
+            verifyNoInteractions(accountService);
+        }
+    }
+
+    @Nested
+    class GetAccounts
+    {
+        @Test
+        public void returnsAccounts_whenUserExists()
+        {
+            //GIVEN
+            when(userRepository.existsById(USER_ID)).thenReturn(true);
+            when(accountService.getAccountsForUser(USER_ID, PAGEABLE)).thenReturn(accountPageResponse());
+
+            //WHEN
+            Page<AccountResponse> accounts = service.getAccountsForUser(USER_ID, PAGEABLE);
+
+            //THEN
+            verify(userRepository, times(1)).existsById(USER_ID);
+            verifyNoMoreInteractions(userRepository);
+            verify(accountService, times(1)).getAccountsForUser(USER_ID, PAGEABLE);
+            verifyNoMoreInteractions(accountService);
+
+            assertEquals(BALANCE, accounts.stream().findFirst().get().balance());
+            assertEquals(PLN, accounts.stream().findFirst().get().currency());
+            assertEquals(1, accounts.getTotalElements());
+            assertEquals(1, accounts.getTotalPages());
+        }
+
+        @Test
+        public void throwsUserNotFoundException_whenUserNotExists()
+        {
+            //GIVEN
+            when(userRepository.existsById(USER_ID)).thenReturn(false);
+
+            //WHEN
+            assertThrows(UserNotFoundException.class, () -> service.getAccountsForUser(USER_ID, PAGEABLE));
+
+            //THEN
+            verify(userRepository, times(1)).existsById(USER_ID);
+            verifyNoMoreInteractions(userRepository);
+            verifyNoInteractions(accountService);
         }
     }
 }

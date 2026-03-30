@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import walletmanager.exception.AccountNotFoundException;
-import walletmanager.exception.UserNotFoundException;
 import walletmanager.repository.AccountRepository;
-import walletmanager.repository.UserRepository;
 import walletmanager.response.AccountResponse;
+import walletmanager.utils.AccountMapper;
 
 import java.util.Optional;
 
@@ -30,7 +30,10 @@ public class AccountServiceTest
     private AccountRepository accountRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private TransactionService transactionService;
+
+    @Spy
+    private AccountMapper accountMapper = new AccountMapper();
 
     @Nested
     class ObtainAccountsForUser
@@ -39,15 +42,12 @@ public class AccountServiceTest
         public void returnsAccounts_whenUserExists()
         {
             //GIVEN
-            when(userRepository.existsById(USER_ID)).thenReturn(true);
             when(accountRepository.findByUserId(USER_ID, PAGEABLE)).thenReturn(accountPageEntity());
 
             //WHEN
             Page<AccountResponse> accounts = service.getAccountsForUser(USER_ID, PAGEABLE);
 
             //THEN
-            verify(userRepository, times(1)).existsById(USER_ID);
-            verifyNoMoreInteractions(userRepository);
             verify(accountRepository, times(1)).findByUserId(USER_ID, PAGEABLE);
             verifyNoMoreInteractions(accountRepository);
 
@@ -55,21 +55,6 @@ public class AccountServiceTest
             assertEquals(PLN, accounts.stream().findFirst().get().currency());
             assertEquals(1, accounts.getTotalElements());
             assertEquals(1, accounts.getTotalPages());
-        }
-
-        @Test
-        public void throwsUserNotFoundException_whenUserNotExists()
-        {
-            //GIVEN
-            when(userRepository.existsById(USER_ID)).thenReturn(false);
-
-            //WHEN
-            assertThrows(UserNotFoundException.class, () -> service.getAccountsForUser(USER_ID, PAGEABLE));
-
-            //THEN
-            verify(userRepository, times(1)).existsById(USER_ID);
-            verifyNoMoreInteractions(userRepository);
-            verifyNoInteractions(accountRepository);
         }
     }
 

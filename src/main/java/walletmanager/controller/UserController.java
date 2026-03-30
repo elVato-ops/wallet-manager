@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
 import walletmanager.response.AccountResponse;
+import walletmanager.response.PageResponse;
 import walletmanager.response.UserResponse;
 import walletmanager.service.UserService;
 
@@ -107,5 +108,28 @@ public class UserController
         return ResponseEntity
                 .created(URI.create("/users/" + account.userId() + "/accounts/" + account.id()))
                 .body(account);
+    }
+
+    @Operation(summary = "Return accounts owned by the user",
+            description = "Returns a list of accounts owned by the specified user. Fails if the user does not exist.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of accounts",
+                    content = @Content(schema = @Schema(implementation = PageResponse.class))),
+            @ApiResponse(responseCode = "400", description = "User id format invalid",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PageableAsQueryParam
+    @GetMapping("/{userId}/accounts")
+    public PageResponse<AccountResponse> getAccountsForUser(
+            @Parameter(description = "Id of the account's owner")
+            @PathVariable @Positive Long userId,
+
+            @Parameter(description = "Pagination parameters: page, size, sort")
+            Pageable pageable)
+    {
+        Page<AccountResponse> page = userService.getAccountsForUser(userId, pageable);
+        return new PageResponse<>(page);
     }
 }

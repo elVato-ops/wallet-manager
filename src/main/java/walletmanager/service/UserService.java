@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import walletmanager.entity.User;
 import walletmanager.exception.UserNotFoundException;
-import walletmanager.repository.AccountRepository;
 import walletmanager.repository.UserRepository;
 import walletmanager.request.CreateAccountRequest;
 import walletmanager.request.CreateUserRequest;
@@ -15,21 +14,19 @@ import walletmanager.response.AccountResponse;
 import walletmanager.response.UserResponse;
 import walletmanager.utils.UserMapper;
 
-import static walletmanager.utils.AccountMapper.toEntity;
-import static walletmanager.utils.AccountMapper.toResponse;
-
 @Service
 @AllArgsConstructor
 public class UserService
 {
     private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
+    private final UserMapper userMapper;
+    private final AccountService accountService;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request)
     {
-        User user = UserMapper.toEntity(request);
-        return UserMapper.toResponse(userRepository.save(user));
+        User user = userMapper.toEntity(request);
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional(readOnly = true)
@@ -38,14 +35,14 @@ public class UserService
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        return UserMapper.toResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable)
     {
         return userRepository.findAll(pageable)
-                .map(UserMapper::toResponse);
+                .map(userMapper::toResponse);
     }
 
     @Transactional
@@ -54,6 +51,16 @@ public class UserService
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return toResponse(accountRepository.save(toEntity(request, user)));
+        return accountService.createAccount(request, user);
+    }
+
+    public Page<AccountResponse> getAccountsForUser(Long id, Pageable pageable)
+    {
+        if (!userRepository.existsById(id))
+        {
+            throw new UserNotFoundException(id);
+        }
+
+        return accountService.getAccountsForUser(id, pageable);
     }
 }

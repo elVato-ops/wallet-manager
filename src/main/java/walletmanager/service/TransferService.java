@@ -7,8 +7,6 @@ import walletmanager.exception.ConcurrentTransferException;
 import walletmanager.request.TransferRequest;
 import walletmanager.response.TransactionResponse;
 
-import static walletmanager.utils.TransactionMapper.toResponse;
-
 @Service
 @AllArgsConstructor
 public class TransferService
@@ -22,7 +20,7 @@ public class TransferService
         {
             try
             {
-                return toResponse(transferManager.transfer(request.fromAccountId(), request.toAccountId(), request.amount()));
+                return transferManager.transfer(request.fromAccountId(), request.toAccountId(), request.amount());
             }
             catch (OptimisticLockException e)
             {
